@@ -1,23 +1,18 @@
 package server
 
 import (
-	"encoding/json"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
+	"fmt"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/handler"
 	"log"
 	"net/http"
-	"net/http/httputil"
 )
 
-func HappinessDoorHandler(w http.ResponseWriter, r *http.Request) {
-	if requestBytes, err := httputil.DumpRequest(r, true); err != nil {
-		log.Println("Failed to parse request", err)
-	} else {
-		log.Println(string(requestBytes))
-	}
+func RunServer(port int) {
+	http.HandleFunc("/rest/v1/happiness-door", handler.HappinessDoorHandler)
 
-	response := domain.SlackResponse{Markdown: true, Text: "hello _Hello_ *HELLO!*"}
-	err := json.NewEncoder(w).Encode(response)
-	if err != nil {
-		log.Println("WARN: Failed to respond to request", err)
-	}
+	hostPort := fmt.Sprintf(":%d", port)
+	log.Println("Registering handler to", hostPort)
+	err := http.ListenAndServe(hostPort, nil)
+
+	log.Println("ERR: Failed to create HTTP server", err)
 }
