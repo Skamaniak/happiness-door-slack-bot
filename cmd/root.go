@@ -8,7 +8,7 @@ import (
 )
 
 func Run(port int) {
-	http.HandleFunc("/", server.HelloServer)
+	http.HandleFunc("/rest/v1/happiness-door", server.HappinessDoorHandler)
 
 	hostPort := fmt.Sprintf(":%d", port)
 	log.Println("Registering handler to", hostPort)
