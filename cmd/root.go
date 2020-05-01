@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"../pkg/server"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/server"
 	"log"
 	"net/http"
 )
 
-func main() {
+func Run() {
 	http.HandleFunc("/", server.HelloServer)
 	err := http.ListenAndServe(":8080", nil)
 
