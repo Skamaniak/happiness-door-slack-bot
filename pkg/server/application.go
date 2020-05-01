@@ -10,6 +10,6 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 	message := "Hello World!"
 	_, err := fmt.Fprintln(w, message)
 	if err != nil {
-		log.Fatal("Failed to respond to request", err)
+		log.Println("WARN: Failed to respond to request", err)
 	}
 }
