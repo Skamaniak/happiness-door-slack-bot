@@ -1,14 +1,18 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/server"
 	"log"
 	"net/http"
 )
 
-func Run() {
+func Run(port int) {
 	http.HandleFunc("/", server.HelloServer)
-	err := http.ListenAndServe(":8080", nil)
+
+	hostPort := fmt.Sprintf(":%d", port)
+	log.Println("Registering handler to", hostPort)
+	err := http.ListenAndServe(hostPort, nil)
 
 	log.Println("ERR: Failed to create HTTP server", err)
 }
