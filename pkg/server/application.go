@@ -1,24 +1,22 @@
 package server
 
 import (
-	"fmt"
+	"encoding/json"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	"log"
 	"net/http"
 	"net/http/httputil"
 )
 
 func HappinessDoorHandler(w http.ResponseWriter, r *http.Request) {
-	var requestStr string
-
 	if requestBytes, err := httputil.DumpRequest(r, true); err != nil {
-		requestStr = "Failed to parse request"
-		log.Println(requestStr, err)
+		log.Println("Failed to parse request", err)
 	} else {
-		requestStr = string(requestBytes)
-		log.Println(requestStr)
+		log.Println(string(requestBytes))
 	}
 
-	_, err := fmt.Fprintf(w, "Request body: %v", requestStr)
+	response := domain.SlackResponse{Markdown: true, Text: "hello _Hello_ *HELLO!*"}
+	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
 		log.Println("WARN: Failed to respond to request", err)
 	}
