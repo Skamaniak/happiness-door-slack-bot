@@ -2,6 +2,7 @@ package domain
 
 import (
 	"github.com/slack-go/slack"
+	"strconv"
 )
 
 func markdownText(text string) *slack.TextBlockObject {
@@ -93,7 +94,7 @@ func CreateResultMessage() slack.Msg {
 		BlockSet: []slack.Block{
 			slack.SectionBlock{
 				Type: "section",
-				Text: plainText(string(i)),
+				Text: plainText(strconv.Itoa(i)),
 				Accessory: &slack.Accessory{
 					ButtonElement: button("VOTE_HAPPY", plainText("Select")),
 				},

@@ -84,7 +84,8 @@ func Interaction(w http.ResponseWriter, r *http.Request) {
 	responseUrl := result.ResponseUrl
 	log.Println("Got response URL", responseUrl)
 
-	jsonBytes := toJson(domain.CreateResultMessage())
+	resp := domain.CreateResultMessage()
+	jsonBytes := toJson(resp)
 	_, err = http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		log.Println("WARN: Failed to send http request to response URL")
