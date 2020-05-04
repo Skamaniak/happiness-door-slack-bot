@@ -48,4 +48,9 @@ func HappinessDoorHandler(w http.ResponseWriter, r *http.Request) {
 
 func Interaction(w http.ResponseWriter, r *http.Request) {
 	logRequest(r)
+	message := domain.CreateResultMessage()
+	err := writeResponse(message, w)
+	if err != nil {
+		log.Println("WARN: Failed to respond to request", err)
+	}
 }

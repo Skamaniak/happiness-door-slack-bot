@@ -72,3 +72,35 @@ func CreateInitMessage(meetingName string) slack.Msg {
 
 	return slack.Msg{Blocks: blocks}
 }
+
+func CreateResultMessage() slack.Msg {
+	blocks := slack.Blocks{
+		BlockSet: []slack.Block{
+			slack.SectionBlock{
+				Type: "section",
+				Text: markdownText("How did you find the meeting?"),
+			},
+			slack.DividerBlock{
+				Type: "divider",
+			},
+			slack.SectionBlock{
+				Type: "section",
+				Text: plainText(":slightly_smiling_face: I'm happy"),
+			},
+			slack.SectionBlock{
+				Type: "section",
+				Text: plainText(":neutral_face: Neither good nor bad"),
+			},
+			slack.SectionBlock{
+				Type: "section",
+				Text: plainText(":disappointed: I did not like it"),
+			},
+			slack.DividerBlock{
+				Type: "divider",
+			},
+			slack.NewActionBlock("", greenButton("FEEDBACK", plainText("I want to provide feedback"))),
+		},
+	}
+
+	return slack.Msg{Blocks: blocks}
+}
