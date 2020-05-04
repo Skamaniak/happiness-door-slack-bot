@@ -102,5 +102,5 @@ func CreateResultMessage() slack.Msg {
 		},
 	}
 
-	return slack.Msg{Blocks: blocks, ReplaceOriginal: true}
+	return slack.Msg{Blocks: blocks, ReplaceOriginal: true, DeleteOriginal: true}
 }
