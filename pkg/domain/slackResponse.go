@@ -25,6 +25,7 @@ func CreateInitMessage(meetingName string) slack.Msg {
 				},
 				Accessory: &slack.Accessory{
 					ButtonElement: &slack.ButtonBlockElement{
+						Type: "button",
 						Text: &slack.TextBlockObject{
 							Type: "plain_text",
 							Text: "Select",
@@ -41,6 +42,7 @@ func CreateInitMessage(meetingName string) slack.Msg {
 				},
 				Accessory: &slack.Accessory{
 					ButtonElement: &slack.ButtonBlockElement{
+						Type: "button",
 						Text: &slack.TextBlockObject{
 							Type: "plain_text",
 							Text: "Select",
@@ -57,6 +59,7 @@ func CreateInitMessage(meetingName string) slack.Msg {
 				},
 				Accessory: &slack.Accessory{
 					ButtonElement: &slack.ButtonBlockElement{
+						Type: "button",
 						Text: &slack.TextBlockObject{
 							Type: "plain_text",
 							Text: "Select",
