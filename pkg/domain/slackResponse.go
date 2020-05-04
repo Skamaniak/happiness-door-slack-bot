@@ -70,7 +70,7 @@ func CreateInitMessage(meetingName string) slack.Msg {
 		},
 	}
 
-	return slack.Msg{Blocks: blocks}
+	return slack.Msg{Blocks: blocks, ResponseType: "in_channel"}
 }
 
 func CreateResultMessage() slack.Msg {
