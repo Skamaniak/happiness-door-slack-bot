@@ -8,7 +8,12 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 )
+
+type interactiveResponse struct {
+	ResponseUrl string `json:"response_url"`
+}
 
 func toJson(v interface{}) []byte {
 	jsonBytes, err := json.Marshal(v)
@@ -61,18 +66,17 @@ func Interaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("Form", r.Form)
-	payload := r.Form.Get("payload")
+	payload, _ := url.QueryUnescape(r.Form.Get("payload"))
 	log.Println("Parsed payload", payload)
-	var result map[string]string
+	var result interactiveResponse
 
-	// Unmarshal or Decode the JSON to the interface.
 	err = json.Unmarshal([]byte(payload), &result)
 	if err != nil {
 		log.Println("WARN: Failed to parse response from payload parameter")
 		return
 	}
 
-	responseUrl := result["response_url"]
+	responseUrl := result.ResponseUrl
 	log.Println("Got response URL", responseUrl)
 
 	jsonBytes := toJson(domain.CreateResultMessage())
