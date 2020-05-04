@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	"github.com/slack-go/slack"
@@ -8,6 +9,14 @@ import (
 	"net/http"
 	"net/http/httputil"
 )
+
+func toJson(v interface{}) []byte {
+	jsonBytes, err := json.Marshal(v)
+	if err != nil {
+		log.Println("WARN: failed to marshal slack message to JSON")
+	}
+	return jsonBytes
+}
 
 func logRequest(r *http.Request) {
 	if requestBytes, err := httputil.DumpRequest(r, true); err != nil {
@@ -19,26 +28,20 @@ func logRequest(r *http.Request) {
 
 func writeResponse(response slack.Msg, w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-
-	jsonBytes, err := json.Marshal(response)
-	if err != nil {
-		log.Println("WARN: failed to marshal slack message to JSON")
-	}
-	_, err = w.Write(jsonBytes)
-	if err != nil {
-		log.Println("WARN: failed to write slack message to response")
-	}
+	jsonBytes := toJson(response)
+	_, err := w.Write(jsonBytes)
 	return err
 }
 
 func HappinessDoorHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	logRequest(r)
 
-	if err := r.ParseForm(); err != nil {
+	if s, err := slack.SlashCommandParse(r); err != nil {
 		log.Println("WARN: Failed to parse request", err)
 	} else {
-		meetingName := r.Form.Get("text")
-		message := domain.CreateInitMessage(meetingName)
+		message := domain.CreateInitMessage(s.Text)
 		err := writeResponse(message, w)
 		if err != nil {
 			log.Println("WARN: Failed to respond to request", err)
@@ -47,12 +50,21 @@ func HappinessDoorHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Interaction(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	logRequest(r)
-	//message := domain.CreateResultMessage()
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte("{\"replace_original\": \"true\",\"text\": \"Thanks for your request, we'll process it and get back to you.\"}"))
-	//err := writeResponse(message, w)
-	//if err != nil {
-	//	log.Println("WARN: Failed to respond to request", err)
-	//}
+
+	if s, err := slack.SlashCommandParse(r); err != nil {
+		log.Println("WARN: Failed to parse request", err)
+	} else {
+		responseUrl := s.ResponseURL
+		log.Println("Got response URL", responseUrl)
+
+		jsonBytes := toJson(domain.CreateResultMessage())
+
+		_, err := http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes))
+		if err != nil {
+			log.Println("WARN: Failed to send http request to response URL")
+		}
+	}
 }
