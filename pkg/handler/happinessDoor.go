@@ -11,8 +11,13 @@ import (
 	"net/url"
 )
 
+type action struct {
+	Value string `json:"value"`
+}
+
 type interactiveResponse struct {
-	ResponseUrl string `json:"response_url"`
+	ResponseUrl string   `json:"response_url"`
+	Actions     []action `json:"actions"`
 }
 
 func toJson(v interface{}) []byte {
