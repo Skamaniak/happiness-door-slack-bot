@@ -60,7 +60,9 @@ func Interaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("Form", r.Form)
 	payload := r.Form.Get("payload")
+	log.Println("Parsed payload", payload)
 	var result map[string]string
 
 	// Unmarshal or Decode the JSON to the interface.
