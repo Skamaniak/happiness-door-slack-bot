@@ -54,17 +54,29 @@ func Interaction(w http.ResponseWriter, r *http.Request) {
 
 	logRequest(r)
 
-	if s, err := slack.SlashCommandParse(r); err != nil {
-		log.Println("WARN: Failed to parse request", err)
-	} else {
-		responseUrl := s.ResponseURL
-		log.Println("Got response URL", responseUrl)
-
-		jsonBytes := toJson(domain.CreateResultMessage())
-
-		_, err := http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes))
-		if err != nil {
-			log.Println("WARN: Failed to send http request to response URL")
-		}
+	err := r.ParseForm()
+	if err != nil {
+		log.Println("WARN: Failed to parse form")
+		return
 	}
+
+	payload := r.Form.Get("payload")
+	var result map[string]string
+
+	// Unmarshal or Decode the JSON to the interface.
+	err = json.Unmarshal([]byte(payload), &result)
+	if err != nil {
+		log.Println("WARN: Failed to parse response from payload parameter")
+		return
+	}
+
+	responseUrl := result["response_url"]
+	log.Println("Got response URL", responseUrl)
+
+	jsonBytes := toJson(domain.CreateResultMessage())
+	_, err = http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes))
+	if err != nil {
+		log.Println("WARN: Failed to send http request to response URL")
+	}
+
 }
