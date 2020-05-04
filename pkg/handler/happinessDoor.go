@@ -6,7 +6,16 @@ import (
 	"github.com/slack-go/slack"
 	"log"
 	"net/http"
+	"net/http/httputil"
 )
+
+func logRequest(r *http.Request) {
+	if requestBytes, err := httputil.DumpRequest(r, true); err != nil {
+		log.Println("Failed to parse request", err)
+	} else {
+		log.Println(string(requestBytes))
+	}
+}
 
 func writeResponse(response slack.Msg, w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -23,6 +32,8 @@ func writeResponse(response slack.Msg, w http.ResponseWriter) error {
 }
 
 func HappinessDoorHandler(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
+
 	if err := r.ParseForm(); err != nil {
 		log.Println("WARN: Failed to parse request", err)
 	} else {
@@ -33,4 +44,8 @@ func HappinessDoorHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("WARN: Failed to respond to request", err)
 		}
 	}
+}
+
+func Interaction(w http.ResponseWriter, r *http.Request) {
+	logRequest(r)
 }

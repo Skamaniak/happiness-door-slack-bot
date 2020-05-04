@@ -13,6 +13,8 @@ func RunServer(port int) {
 
 	router.HandleFunc("/rest/v1/happiness-door", handler.HappinessDoorHandler).
 		Methods("POST")
+	router.HandleFunc("/rest/v1/happiness-door/interactive", handler.Interaction).
+		Methods("POST")
 
 	hostPort := fmt.Sprintf(":%d", port)
 	log.Println("Registering handler to", hostPort)
