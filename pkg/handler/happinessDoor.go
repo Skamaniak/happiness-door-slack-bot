@@ -37,7 +37,9 @@ func logRequest(r *http.Request) {
 }
 
 func writeResponse(response slack.Msg, w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().
+		Set("Content-Type", "application/json")
+
 	jsonBytes := toJson(response)
 	_, err := w.Write(jsonBytes)
 	return err

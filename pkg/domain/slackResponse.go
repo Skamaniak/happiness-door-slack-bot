@@ -2,7 +2,6 @@ package domain
 
 import (
 	"github.com/slack-go/slack"
-	"strconv"
 )
 
 func markdownText(text string) *slack.TextBlockObject {
@@ -34,73 +33,46 @@ func greenButton(action string, text *slack.TextBlockObject) *slack.ButtonBlockE
 }
 
 func CreateInitMessage(meetingName string) slack.Msg {
-	//blocks := slack.Blocks{
-	//	BlockSet: []slack.Block{
-	//		slack.SectionBlock{
-	//			Type: "section",
-	//			Text: markdownText("How did you find the *" + meetingName + "* meeting?"),
-	//		},
-	//		slack.DividerBlock{
-	//			Type: "divider",
-	//		},
-	//		slack.SectionBlock{
-	//			Type: "section",
-	//			Text: plainText(":slightly_smiling_face: I'm happy"),
-	//			Accessory: &slack.Accessory{
-	//				ButtonElement: button("VOTE_HAPPY", plainText("Select")),
-	//			},
-	//		},
-	//		slack.SectionBlock{
-	//			Type: "section",
-	//			Text: plainText(":neutral_face: Neither good nor bad"),
-	//			Accessory: &slack.Accessory{
-	//				ButtonElement: button("VOTE_NEUTRAL", plainText("Select")),
-	//			},
-	//		},
-	//		slack.SectionBlock{
-	//			Type: "section",
-	//			Text: plainText(":disappointed: I did not like it"),
-	//			Accessory: &slack.Accessory{
-	//				ButtonElement: button("VOTE_SAD", plainText("Select")),
-	//			},
-	//		},
-	//		slack.DividerBlock{
-	//			Type: "divider",
-	//		},
-	//		slack.NewActionBlock("", greenButton("FEEDBACK", plainText("I want to provide feedback"))),
-	//	},
-	//}
-
 	blocks := slack.Blocks{
 		BlockSet: []slack.Block{
 			slack.SectionBlock{
 				Type: "section",
-				Text: plainText("1"),
+				Text: markdownText("How did you find the *" + meetingName + "* meeting?"),
+			},
+			slack.DividerBlock{
+				Type: "divider",
+			},
+			slack.SectionBlock{
+				Type: "section",
+				Text: plainText(":slightly_smiling_face: I'm happy"),
 				Accessory: &slack.Accessory{
 					ButtonElement: button("VOTE_HAPPY", plainText("Select")),
 				},
 			},
+			slack.SectionBlock{
+				Type: "section",
+				Text: plainText(":neutral_face: Neither good nor bad"),
+				Accessory: &slack.Accessory{
+					ButtonElement: button("VOTE_NEUTRAL", plainText("Select")),
+				},
+			},
+			slack.SectionBlock{
+				Type: "section",
+				Text: plainText(":disappointed: I did not like it"),
+				Accessory: &slack.Accessory{
+					ButtonElement: button("VOTE_SAD", plainText("Select")),
+				},
+			},
+			slack.DividerBlock{
+				Type: "divider",
+			},
+			slack.NewActionBlock("", greenButton("FEEDBACK", plainText("I want to provide feedback"))),
 		},
 	}
 
 	return slack.Msg{Blocks: blocks, ResponseType: "in_channel"}
 }
 
-var i = 1
-
 func CreateResultMessage() slack.Msg {
-	i = i + 1
-	blocks := slack.Blocks{
-		BlockSet: []slack.Block{
-			slack.SectionBlock{
-				Type: "section",
-				Text: plainText(strconv.Itoa(i)),
-				Accessory: &slack.Accessory{
-					ButtonElement: button("VOTE_HAPPY", plainText("Select")),
-				},
-			},
-		},
-	}
-
-	return slack.Msg{Blocks: blocks, ReplaceOriginal: true}
+	return slack.Msg{Text: "Yay!", ReplaceOriginal: true}
 }
