@@ -6,18 +6,9 @@ type HappinessDoorRecord struct {
 	Happy   int
 	Neutral int
 	Sad     int
+	Voters  string
 }
 
 func StubRecord(id int, name string) HappinessDoorRecord {
-	return FullRecord(id, name, 0, 0, 0)
-}
-
-func FullRecord(id int, name string, happy int, neutral int, sad int) HappinessDoorRecord {
-	return HappinessDoorRecord{
-		Id:      id,
-		Name:    name,
-		Happy:   happy,
-		Neutral: neutral,
-		Sad:     sad,
-	}
+	return HappinessDoorRecord{Id: id, Name: name}
 }

@@ -56,11 +56,12 @@ func (hd *HappinessDoor) CreateHappinessDoor(name string) (int, error) {
 	return id, err
 }
 
-func (hd *HappinessDoor) InsertUserAction(hdId int, userId string, action string) error {
-	sqlStatement := `INSERT INTO happiness_door_user_action(happiness_door_id, user_id, action_id) VALUES ($1, $2, $3)
-			ON CONFLICT ON CONSTRAINT unique_user_vote DO UPDATE SET action_id = $3;`
+func (hd *HappinessDoor) InsertUserAction(hdId int, userId string, userName string, action string) error {
+	sqlStatement :=
+		`INSERT INTO happiness_door_user_action(happiness_door_id, user_id, user_name, action_id) VALUES ($1, $2, $3, $4)
+			ON CONFLICT ON CONSTRAINT unique_user_vote DO UPDATE SET action_id = $4;`
 
-	_, err := hd.db.Exec(sqlStatement, hdId, userId, action)
+	_, err := hd.db.Exec(sqlStatement, hdId, userId, userName, action)
 	return err
 }
 
@@ -73,15 +74,15 @@ func (hd *HappinessDoor) GetStats(hdId int) (*domain.HappinessDoorRecord, error)
 		return nil, err
 	}
 
-	rows, err := hd.db.Query("SELECT action_id from happiness_door_user_action WHERE happiness_door_id = $1;", hdId)
+	rows, err := hd.db.Query("SELECT action_id, user_name from happiness_door_user_action WHERE happiness_door_id = $1 ORDER BY user_name ASC;", hdId)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 	for rows.Next() {
-		var action string
-		err := rows.Scan(&action)
+		var action, userName string
+		err := rows.Scan(&action, &userName)
 		if err != nil {
 			return nil, err
 		}
@@ -92,6 +93,11 @@ func (hd *HappinessDoor) GetStats(hdId int) (*domain.HappinessDoorRecord, error)
 			r.Neutral++
 		case domain.ActionVoteSad:
 			r.Sad++
+		}
+		if r.Voters == "" {
+			r.Voters = "Voters: " + userName
+		} else {
+			r.Voters += ", " + userName
 		}
 	}
 

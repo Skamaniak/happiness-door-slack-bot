@@ -38,11 +38,11 @@ func button(id int, action string, text *slack.TextBlockObject) *slack.ButtonBlo
 	}
 }
 
-func greenButton(id int, action string, text *slack.TextBlockObject) *slack.ButtonBlockElement {
-	btn := button(id, action, text)
-	btn.Style = "primary"
-	return btn
-}
+//func greenButton(id int, action string, text *slack.TextBlockObject) *slack.ButtonBlockElement {
+//	btn := button(id, action, text)
+//	btn.Style = "primary"
+//	return btn
+//}
 
 func createBlocks(hde HappinessDoorRecord) slack.Blocks {
 	return slack.Blocks{
@@ -78,7 +78,11 @@ func createBlocks(hde HappinessDoorRecord) slack.Blocks {
 			slack.DividerBlock{
 				Type: "divider",
 			},
-			slack.NewActionBlock("", greenButton(hde.Id, "FEEDBACK", plainText("I want to provide feedback"))),
+			slack.SectionBlock{
+				Type: "section",
+				Text: markdownText(hde.Voters),
+			},
+			//slack.NewActionBlock("", greenButton(hde.Id, "FEEDBACK", plainText("I want to provide feedback"))), //TODO add feedback
 		},
 	}
 }

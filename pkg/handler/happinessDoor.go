@@ -19,7 +19,8 @@ type action struct {
 }
 
 type user struct {
-	Id string `json:"id"`
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type Handlers struct {
@@ -89,15 +90,16 @@ func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) incrementVoting(result interactiveResponse) error {
 	action := extractAction(result)
 	id := extractHappinessDoorId(result)
+	user := result.User
 
 	var err error
 	switch action.Action {
 	case domain.ActionVoteHappy:
-		err = h.repo.InsertUserAction(id, result.User.Id, action.Action)
+		err = h.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
 	case domain.ActionVoteNeutral:
-		err = h.repo.InsertUserAction(id, result.User.Id, action.Action)
+		err = h.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
 	case domain.ActionVoteSad:
-		err = h.repo.InsertUserAction(id, result.User.Id, action.Action)
+		err = h.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
 	}
 	return err
 }
