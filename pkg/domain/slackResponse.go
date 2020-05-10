@@ -2,6 +2,7 @@ package domain
 
 import (
 	"github.com/slack-go/slack"
+	"strconv"
 )
 
 func markdownText(text string) *slack.TextBlockObject {
@@ -18,21 +19,22 @@ func plainText(text string) *slack.TextBlockObject {
 	}
 }
 
-func button(action string, text *slack.TextBlockObject) *slack.ButtonBlockElement {
+func button(id int, action string, text *slack.TextBlockObject) *slack.ButtonBlockElement {
 	return &slack.ButtonBlockElement{
-		Type:  "button",
-		Text:  text,
-		Value: action,
+		Type:     "button",
+		Text:     text,
+		Value:    strconv.Itoa(id),
+		ActionID: action,
 	}
 }
 
-func greenButton(action string, text *slack.TextBlockObject) *slack.ButtonBlockElement {
-	btn := button(action, text)
+func greenButton(id int, action string, text *slack.TextBlockObject) *slack.ButtonBlockElement {
+	btn := button(id, action, text)
 	btn.Style = "primary"
 	return btn
 }
 
-func CreateInitMessage(meetingName string) slack.Msg {
+func CreateInitMessage(id int, meetingName string) slack.Msg {
 	blocks := slack.Blocks{
 		BlockSet: []slack.Block{
 			slack.SectionBlock{
@@ -46,27 +48,27 @@ func CreateInitMessage(meetingName string) slack.Msg {
 				Type: "section",
 				Text: plainText(":slightly_smiling_face: I'm happy"),
 				Accessory: &slack.Accessory{
-					ButtonElement: button("VOTE_HAPPY", plainText("Select")),
+					ButtonElement: button(id, "VOTE_HAPPY", plainText("Select")),
 				},
 			},
 			slack.SectionBlock{
 				Type: "section",
 				Text: plainText(":neutral_face: Neither good nor bad"),
 				Accessory: &slack.Accessory{
-					ButtonElement: button("VOTE_NEUTRAL", plainText("Select")),
+					ButtonElement: button(id, "VOTE_NEUTRAL", plainText("Select")),
 				},
 			},
 			slack.SectionBlock{
 				Type: "section",
 				Text: plainText(":disappointed: I did not like it"),
 				Accessory: &slack.Accessory{
-					ButtonElement: button("VOTE_SAD", plainText("Select")),
+					ButtonElement: button(id, "VOTE_SAD", plainText("Select")),
 				},
 			},
 			slack.DividerBlock{
 				Type: "divider",
 			},
-			slack.NewActionBlock("", greenButton("FEEDBACK", plainText("I want to provide feedback"))),
+			slack.NewActionBlock("", greenButton(id, "FEEDBACK", plainText("I want to provide feedback"))),
 		},
 	}
 

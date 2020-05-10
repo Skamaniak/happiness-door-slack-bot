@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/db"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	"github.com/slack-go/slack"
 	"log"
@@ -12,12 +13,21 @@ import (
 )
 
 type action struct {
-	Value string `json:"value"`
+	Value    string `json:"value"`
+	ActionId string `json:"action_id"`
+}
+
+type Handlers struct {
+	repo *db.HappinessDoor
 }
 
 type interactiveResponse struct {
 	ResponseUrl string   `json:"response_url"`
 	Actions     []action `json:"actions"`
+}
+
+func NewHandlers(repo *db.HappinessDoor) *Handlers {
+	return &Handlers{repo: repo}
 }
 
 func toJson(v interface{}) []byte {
@@ -45,26 +55,33 @@ func writeResponse(response slack.Msg, w http.ResponseWriter) error {
 	return err
 }
 
-func HappinessDoorHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
+func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 	logRequest(r)
+	defer func() { _ = r.Body.Close() }()
 
-	if s, err := slack.SlashCommandParse(r); err != nil {
+	slash, err := slack.SlashCommandParse(r)
+	if err != nil {
 		log.Println("WARN: Failed to parse request", err)
-	} else {
-		message := domain.CreateInitMessage(s.Text)
-		err := writeResponse(message, w)
-		if err != nil {
-			log.Println("WARN: Failed to respond to request", err)
-		}
+		return
 	}
+
+	id, err := h.repo.CreateHappinessDoor()
+	if err != nil {
+		log.Println("WARN: Failed to create new happiness door record in db", err)
+		return
+	}
+
+	message := domain.CreateInitMessage(id, slash.Text)
+	err = writeResponse(message, w)
+	if err != nil {
+		log.Println("WARN: Failed to respond to request", err)
+	}
+
 }
 
-func Interaction(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
+func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 	logRequest(r)
+	defer func() { _ = r.Body.Close() }()
 
 	err := r.ParseForm()
 	if err != nil {
