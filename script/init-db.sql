@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS happiness_door;
 CREATE TABLE happiness_door
 (
     id      SERIAL PRIMARY KEY,
+    name    VARCHAR(256) NOT NULL,
     happy   INT NOT NULL DEFAULT 0,
     neutral INT NOT NULL DEFAULT 0,
     sad     INT NOT NULL DEFAULT 0

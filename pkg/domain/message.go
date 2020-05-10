@@ -1,9 +1,14 @@
 package domain
 
 import (
+	"fmt"
 	"github.com/slack-go/slack"
 	"strconv"
 )
+
+const ActionVoteHappy = "VOTE_HAPPY"
+const ActionVoteNeutral = "VOTE_NEUTRAL"
+const ActionVoteSad = "VOTE_SAD"
 
 func markdownText(text string) *slack.TextBlockObject {
 	return &slack.TextBlockObject{
@@ -17,6 +22,11 @@ func plainText(text string) *slack.TextBlockObject {
 		Type: "plain_text",
 		Text: text,
 	}
+}
+
+func messageWithVotes(message string, votes int) *slack.TextBlockObject {
+	m := fmt.Sprintf("%s - *%d votes*", message, votes)
+	return markdownText(m)
 }
 
 func button(id int, action string, text *slack.TextBlockObject) *slack.ButtonBlockElement {
@@ -34,47 +44,43 @@ func greenButton(id int, action string, text *slack.TextBlockObject) *slack.Butt
 	return btn
 }
 
-func CreateInitMessage(id int, meetingName string) slack.Msg {
+func CreateSlackMessage(hde HappinessDoorRecord) slack.Msg {
 	blocks := slack.Blocks{
 		BlockSet: []slack.Block{
 			slack.SectionBlock{
 				Type: "section",
-				Text: markdownText("How did you find the *" + meetingName + "* meeting?"),
+				Text: markdownText("How did you find the *" + hde.Name + "* meeting?"),
 			},
 			slack.DividerBlock{
 				Type: "divider",
 			},
 			slack.SectionBlock{
 				Type: "section",
-				Text: plainText(":slightly_smiling_face: I'm happy"),
+				Text: messageWithVotes(":slightly_smiling_face: I'm happy", hde.Happy),
 				Accessory: &slack.Accessory{
-					ButtonElement: button(id, "VOTE_HAPPY", plainText("Select")),
+					ButtonElement: button(hde.Id, ActionVoteHappy, plainText("Select")),
 				},
 			},
 			slack.SectionBlock{
 				Type: "section",
-				Text: plainText(":neutral_face: Neither good nor bad"),
+				Text: messageWithVotes(":neutral_face: Neither good nor bad", hde.Neutral),
 				Accessory: &slack.Accessory{
-					ButtonElement: button(id, "VOTE_NEUTRAL", plainText("Select")),
+					ButtonElement: button(hde.Id, ActionVoteNeutral, plainText("Select")),
 				},
 			},
 			slack.SectionBlock{
 				Type: "section",
-				Text: plainText(":disappointed: I did not like it"),
+				Text: messageWithVotes(":disappointed: I did not like it", hde.Sad),
 				Accessory: &slack.Accessory{
-					ButtonElement: button(id, "VOTE_SAD", plainText("Select")),
+					ButtonElement: button(hde.Id, ActionVoteSad, plainText("Select")),
 				},
 			},
 			slack.DividerBlock{
 				Type: "divider",
 			},
-			slack.NewActionBlock("", greenButton(id, "FEEDBACK", plainText("I want to provide feedback"))),
+			slack.NewActionBlock("", greenButton(hde.Id, "FEEDBACK", plainText("I want to provide feedback"))),
 		},
 	}
 
 	return slack.Msg{Blocks: blocks, ResponseType: "in_channel"}
-}
-
-func CreateResultMessage() slack.Msg {
-	return slack.Msg{Text: "Yay!", ReplaceOriginal: true}
 }

@@ -10,11 +10,12 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 )
 
 type action struct {
-	Value    string `json:"value"`
-	ActionId string `json:"action_id"`
+	Identifier string `json:"value"`
+	Action     string `json:"action_id"`
 }
 
 type Handlers struct {
@@ -65,18 +66,37 @@ func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.repo.CreateHappinessDoor()
+	meetingName := slash.Text
+	id, err := h.repo.CreateHappinessDoor(meetingName)
 	if err != nil {
 		log.Println("WARN: Failed to create new happiness door record in db", err)
 		return
 	}
 
-	message := domain.CreateInitMessage(id, slash.Text)
+	message := domain.CreateSlackMessage(domain.StubRecord(id, meetingName))
 	err = writeResponse(message, w)
 	if err != nil {
 		log.Println("WARN: Failed to respond to request", err)
 	}
 
+}
+
+func (h *Handlers) incrementVoting(result interactiveResponse) (domain.HappinessDoorRecord, error) {
+	action := result.Actions[0]
+	id, _ := strconv.Atoi(action.Identifier)
+
+	var hdr domain.HappinessDoorRecord
+	var err error
+
+	switch action.Action {
+	case domain.ActionVoteHappy:
+		hdr, err = h.repo.IncHappy(id)
+	case domain.ActionVoteNeutral:
+		hdr, err = h.repo.IncNeutral(id)
+	case domain.ActionVoteSad:
+		hdr, err = h.repo.IncSad(id)
+	}
+	return hdr, err
 }
 
 func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
@@ -96,14 +116,19 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal([]byte(payload), &result)
 	if err != nil {
-		log.Println("WARN: Failed to parse response from payload parameter")
+		log.Println("WARN: Failed to parse response from payload parameter", err)
 		return
+	}
+
+	hdr, err := h.incrementVoting(result)
+	if err != nil {
+		log.Println("WARN: Failed to increment voting", err)
 	}
 
 	responseUrl := result.ResponseUrl
 	log.Println("Got response URL", responseUrl)
 
-	resp := domain.CreateResultMessage()
+	resp := domain.CreateSlackMessage(hdr)
 	jsonBytes := toJson(resp)
 	_, err = http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes))
 	if err != nil {
