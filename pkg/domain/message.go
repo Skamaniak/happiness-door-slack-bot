@@ -52,6 +52,7 @@ func createBlocks(hde HappinessDoorRecord) slack.Blocks {
 				Type: "section",
 				Text: markdownText("How did you find the *" + hde.Name + "* meeting?"),
 			},
+			slack.NewContextBlock("", plainText("Feel free to leave an additional comment in a thread under this post")),
 			slack.DividerBlock{
 				Type: "divider",
 			},
