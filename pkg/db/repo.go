@@ -71,7 +71,7 @@ func (hd *HappinessDoor) GetStats(hdId int) (*domain.HappinessDoorRecord, error)
 		return nil, err
 	}
 
-	rows, err := hd.db.Query("SELECT action_id from happiness_door_user_action WHERE id = $1;", hdId)
+	rows, err := hd.db.Query("SELECT action_id from happiness_door_user_action WHERE happiness_door_id = $1;", hdId)
 	if err != nil {
 		return nil, err
 	}
