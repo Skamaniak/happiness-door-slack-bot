@@ -44,8 +44,8 @@ func greenButton(id int, action string, text *slack.TextBlockObject) *slack.Butt
 	return btn
 }
 
-func CreateSlackMessage(hde HappinessDoorRecord) slack.Msg {
-	blocks := slack.Blocks{
+func createBlocks(hde HappinessDoorRecord) slack.Blocks {
+	return slack.Blocks{
 		BlockSet: []slack.Block{
 			slack.SectionBlock{
 				Type: "section",
@@ -81,6 +81,9 @@ func CreateSlackMessage(hde HappinessDoorRecord) slack.Msg {
 			slack.NewActionBlock("", greenButton(hde.Id, "FEEDBACK", plainText("I want to provide feedback"))),
 		},
 	}
+}
 
-	return slack.Msg{Blocks: blocks, ResponseType: "in_channel"}
+func CreateSlackMessage(hde HappinessDoorRecord) slack.Msg {
+	blocks := createBlocks(hde)
+	return slack.Msg{Blocks: blocks, ResponseType: "in_channel", ReplaceOriginal: true}
 }
