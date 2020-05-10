@@ -94,11 +94,7 @@ func (hd *HappinessDoor) GetStats(hdId int) (*domain.HappinessDoorRecord, error)
 		case domain.ActionVoteSad:
 			r.Sad++
 		}
-		if r.Voters == "" {
-			r.Voters = "Voters: " + userName
-		} else {
-			r.Voters += ", " + userName
-		}
+		r.Voters = append(r.Voters, userName)
 	}
 
 	err = rows.Err()

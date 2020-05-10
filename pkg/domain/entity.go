@@ -6,7 +6,7 @@ type HappinessDoorRecord struct {
 	Happy   int
 	Neutral int
 	Sad     int
-	Voters  string
+	Voters  []string
 }
 
 func StubRecord(id int, name string) HappinessDoorRecord {

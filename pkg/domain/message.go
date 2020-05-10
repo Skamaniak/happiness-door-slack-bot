@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/slack-go/slack"
 	"strconv"
+	"strings"
 )
 
 const ActionVoteHappy = "VOTE_HAPPY"
@@ -78,14 +79,16 @@ func createBlocks(hde HappinessDoorRecord) slack.Blocks {
 			//slack.NewActionBlock("", greenButton(hde.Id, "FEEDBACK", plainText("I want to provide feedback"))), //TODO add feedback
 		},
 	}
-	if hde.Voters != "" {
+	if len(hde.Voters) > 0 {
+		votersString := "*Voted*: " + strings.Join(hde.Voters[:], ", ")
+
 		blocks.BlockSet = append(blocks.BlockSet,
 			slack.DividerBlock{
 				Type: "divider",
 			},
 			slack.SectionBlock{
 				Type: "section",
-				Text: markdownText(hde.Voters),
+				Text: markdownText(votersString),
 			})
 	}
 
