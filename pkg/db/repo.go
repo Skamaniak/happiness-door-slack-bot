@@ -56,22 +56,65 @@ func (hd *HappinessDoor) CreateHappinessDoor(name string) (int, error) {
 	return id, err
 }
 
-func (hd *HappinessDoor) increment(id int, attr string) (domain.HappinessDoorRecord, error) {
-	sqlStatement := "UPDATE happiness_door SET " + attr + " = " + attr + " + 1 WHERE id = $1 RETURNING id, name, happy, neutral, sad;"
+func (hd *HappinessDoor) InsertUserAction(hdId int, userId string, action string) error {
+	sqlStatement := `INSERT INTO happiness_door_user_action(happiness_door_id, user_id, action_id) VALUES ($1, $2, $3);`
+	_, err := hd.db.Exec(sqlStatement, hdId, userId, action)
+	return err
+}
+
+// TODO create a service layer and move this to it
+func (hd *HappinessDoor) GetStats(hdId int) (*domain.HappinessDoorRecord, error) {
 	var r domain.HappinessDoorRecord
+	err := hd.db.QueryRow("SELECT id, name FROM happiness_door WHERE id = $1;", hdId).Scan(&r.Id, &r.Name)
 
-	err := hd.db.QueryRow(sqlStatement, id).Scan(&r.Id, &r.Name, &r.Happy, &r.Neutral, &r.Sad)
-	return r, err
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := hd.db.Query("SELECT action_id from happiness_door_user_action WHERE id = $1;")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var action string
+		err := rows.Scan(&action)
+		if err != nil {
+			return nil, err
+		}
+		switch action {
+		case domain.ActionVoteHappy:
+			r.Happy++
+		case domain.ActionVoteNeutral:
+			r.Neutral++
+		case domain.ActionVoteSad:
+			r.Sad++
+		}
+	}
+
+	err = rows.Err()
+	return &r, err
 }
 
-func (hd *HappinessDoor) IncHappy(id int) (domain.HappinessDoorRecord, error) {
-	return hd.increment(id, "happy")
-}
-
-func (hd *HappinessDoor) IncNeutral(id int) (domain.HappinessDoorRecord, error) {
-	return hd.increment(id, "neutral")
-}
-
-func (hd *HappinessDoor) IncSad(id int) (domain.HappinessDoorRecord, error) {
-	return hd.increment(id, "sad")
-}
+// FIXME RM
+//func (hd *HappinessDoor) increment(id int, attr string) (domain.HappinessDoorRecord, error) {
+//	sqlStatement := "UPDATE happiness_door SET " + attr + " = " + attr + " + 1 WHERE id = $1 RETURNING id, name, happy, neutral, sad;"
+//	var r domain.HappinessDoorRecord
+//
+//	err := hd.db.QueryRow(sqlStatement, id).Scan(&r.Id, &r.Name, &r.Happy, &r.Neutral, &r.Sad)
+//	return r, err
+//}
+//
+//func (hd *HappinessDoor) IncHappy(id int) (domain.HappinessDoorRecord, error) {
+//	return hd.increment(id, "happy")
+//}
+//
+//
+//func (hd *HappinessDoor) IncNeutral(id int) (domain.HappinessDoorRecord, error) {
+//	return hd.increment(id, "neutral")
+//}
+//
+//func (hd *HappinessDoor) IncSad(id int) (domain.HappinessDoorRecord, error) {
+//	return hd.increment(id, "sad")
+//}

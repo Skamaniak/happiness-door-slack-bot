@@ -18,12 +18,17 @@ type action struct {
 	Action     string `json:"action_id"`
 }
 
+type user struct {
+	Id string `json:"id"`
+}
+
 type Handlers struct {
 	repo *db.HappinessDoor
 }
 
 type interactiveResponse struct {
 	ResponseUrl string   `json:"response_url"`
+	User        user     `json:"user"`
 	Actions     []action `json:"actions"`
 }
 
@@ -81,22 +86,30 @@ func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handlers) incrementVoting(result interactiveResponse) (domain.HappinessDoorRecord, error) {
-	action := result.Actions[0]
-	id, _ := strconv.Atoi(action.Identifier)
+func (h *Handlers) incrementVoting(result interactiveResponse) error {
+	action := extractAction(result)
+	id := extractHappinessDoorId(result)
 
-	var hdr domain.HappinessDoorRecord
 	var err error
-
 	switch action.Action {
 	case domain.ActionVoteHappy:
-		hdr, err = h.repo.IncHappy(id)
+		err = h.repo.InsertUserAction(id, result.User.Id, action.Action)
 	case domain.ActionVoteNeutral:
-		hdr, err = h.repo.IncNeutral(id)
+		err = h.repo.InsertUserAction(id, result.User.Id, action.Action)
 	case domain.ActionVoteSad:
-		hdr, err = h.repo.IncSad(id)
+		err = h.repo.InsertUserAction(id, result.User.Id, action.Action)
 	}
-	return hdr, err
+	return err
+}
+
+func extractAction(res interactiveResponse) action {
+	return res.Actions[0]
+}
+
+func extractHappinessDoorId(res interactiveResponse) int {
+	id := extractAction(res).Identifier
+	i, _ := strconv.Atoi(id)
+	return i
 }
 
 func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
@@ -120,7 +133,13 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hdr, err := h.incrementVoting(result)
+	err = h.incrementVoting(result)
+	if err != nil {
+		log.Println("WARN: Failed to increment voting", err)
+	}
+
+	id := extractHappinessDoorId(result)
+	hdr, err := h.repo.GetStats(id)
 	if err != nil {
 		log.Println("WARN: Failed to increment voting", err)
 	}
@@ -128,7 +147,7 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 	responseUrl := result.ResponseUrl
 	log.Println("Got response URL", responseUrl)
 
-	resp := domain.CreateSlackMessage(hdr)
+	resp := domain.CreateSlackMessage(*hdr)
 	jsonBytes := toJson(resp)
 	_, err = http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes))
 	if err != nil {
