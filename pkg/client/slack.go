@@ -17,7 +17,7 @@ func NewSlackClient() *SlackClient {
 }
 
 func (c *SlackClient) GetUserIconUrl(userId string) (string, error) {
-	profile, err := c.api.GetUserProfile(userId, true)
+	profile, err := c.api.GetUserProfile(userId, false)
 	if err != nil {
 		return "", err
 	}
