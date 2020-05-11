@@ -49,7 +49,7 @@ func (s *SlackService) GetVoting(hdId int) (*domain.HappinessDoorRecord, error) 
 	for userInfo, action := range actions {
 		userIcon, err := s.slackClient.GetUserIconUrl(userInfo.Id)
 		if err != nil {
-			log.Println("WARN: Failed to fetch icon for user", userInfo.Id)
+			log.Println("WARN: Failed to fetch icon for user", userInfo.Id, err)
 		}
 		userInfo.ProfilePicture = userIcon
 		switch action {
