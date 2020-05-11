@@ -105,7 +105,7 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 
 	resp := domain.CreateSlackMessage(*hdr)
 	jsonBytes := toJson(resp)
-	_, err = http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes))
+	_, err = http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes)) //TODO move this to service layer
 	if err != nil {
 		log.Println("WARN: Failed to send http request to response URL")
 	}
