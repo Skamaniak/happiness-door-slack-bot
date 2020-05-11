@@ -3,6 +3,7 @@ package conf
 import "github.com/spf13/viper"
 
 const AppPort = "PORT"
+const SlackToken = "SLACK_TOKEN"
 const DbHost = "DB_HOST"
 const DbPort = "DB_PORT"
 const DbName = "DB_NAME"
@@ -11,6 +12,9 @@ const DbPassword = "DB_PASSWORD"
 
 func InitConfig() {
 	viper.AutomaticEnv()
+
+	// Slack
+	viper.SetDefault(SlackToken, "")
 
 	// App details
 	viper.SetDefault(AppPort, 8080)

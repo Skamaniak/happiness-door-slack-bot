@@ -3,38 +3,21 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/db"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
 	"github.com/slack-go/slack"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strconv"
 )
 
-type action struct {
-	Identifier string `json:"value"`
-	Action     string `json:"action_id"`
-}
-
-type user struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
 type Handlers struct {
-	repo *db.HappinessDoor
+	service *service.SlackService
 }
 
-type interactiveResponse struct {
-	ResponseUrl string   `json:"response_url"`
-	User        user     `json:"user"`
-	Actions     []action `json:"actions"`
-}
-
-func NewHandlers(repo *db.HappinessDoor) *Handlers {
-	return &Handlers{repo: repo}
+func NewHandlers(service *service.SlackService) *Handlers {
+	return &Handlers{service: service}
 }
 
 func toJson(v interface{}) []byte {
@@ -73,7 +56,7 @@ func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	meetingName := slash.Text
-	id, err := h.repo.CreateHappinessDoor(meetingName)
+	id, err := h.service.CreateHappinessDoor(meetingName)
 	if err != nil {
 		log.Println("WARN: Failed to create new happiness door record in db", err)
 		return
@@ -84,34 +67,6 @@ func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("WARN: Failed to respond to request", err)
 	}
-
-}
-
-func (h *Handlers) incrementVoting(result interactiveResponse) error {
-	action := extractAction(result)
-	id := extractHappinessDoorId(result)
-	user := result.User
-
-	var err error
-	switch action.Action {
-	case domain.ActionVoteHappy:
-		err = h.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
-	case domain.ActionVoteNeutral:
-		err = h.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
-	case domain.ActionVoteSad:
-		err = h.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
-	}
-	return err
-}
-
-func extractAction(res interactiveResponse) action {
-	return res.Actions[0]
-}
-
-func extractHappinessDoorId(res interactiveResponse) int {
-	id := extractAction(res).Identifier
-	i, _ := strconv.Atoi(id)
-	return i
 }
 
 func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
@@ -127,7 +82,7 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 	log.Println("Form", r.Form)
 	payload, _ := url.QueryUnescape(r.Form.Get("payload"))
 	log.Println("Parsed payload", payload)
-	var result interactiveResponse
+	var result domain.InteractiveResponse
 
 	err = json.Unmarshal([]byte(payload), &result)
 	if err != nil {
@@ -135,13 +90,12 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.incrementVoting(result)
+	id, err := h.service.IncrementVoting(result)
 	if err != nil {
 		log.Println("WARN: Failed to increment voting", err)
 	}
 
-	id := extractHappinessDoorId(result)
-	hdr, err := h.repo.GetStats(id)
+	hdr, err := h.service.GetVoting(id)
 	if err != nil {
 		log.Println("WARN: Failed to increment voting", err)
 	}

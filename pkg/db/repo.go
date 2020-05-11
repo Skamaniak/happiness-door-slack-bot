@@ -65,38 +65,31 @@ func (hd *HappinessDoor) InsertUserAction(hdId int, userId string, userName stri
 	return err
 }
 
-// TODO create a service layer and move this to it
-func (hd *HappinessDoor) GetStats(hdId int) (*domain.HappinessDoorRecord, error) {
-	var r domain.HappinessDoorRecord
-	err := hd.db.QueryRow("SELECT id, name FROM happiness_door WHERE id = $1;", hdId).Scan(&r.Id, &r.Name)
+func (hd *HappinessDoor) GetMeetingName(hdId int) (string, error) {
+	var name string
+	err := hd.db.QueryRow("SELECT name FROM happiness_door WHERE id = $1;", hdId).Scan(&name)
+	return name, err
+}
 
+func (hd *HappinessDoor) GetUserActions(hdId int) (map[domain.UserInfo]string, error) {
+	actions := make(map[domain.UserInfo]string)
+
+	rows, err := hd.db.Query(
+		"SELECT action_id, user_id, user_name from happiness_door_user_action WHERE happiness_door_id = $1 ORDER BY user_name ASC;", hdId)
 	if err != nil {
-		return nil, err
+		return actions, err
 	}
 
-	rows, err := hd.db.Query("SELECT action_id, user_name from happiness_door_user_action WHERE happiness_door_id = $1 ORDER BY user_name ASC;", hdId)
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	for rows.Next() {
-		var action, userName string
-		err := rows.Scan(&action, &userName)
+		var userInfo domain.UserInfo
+		var action string
+		err := rows.Scan(&action, &userInfo.Id, &userInfo.Name)
 		if err != nil {
-			return nil, err
+			return actions, err
 		}
-		switch action {
-		case domain.ActionVoteHappy:
-			r.Happy++
-		case domain.ActionVoteNeutral:
-			r.Neutral++
-		case domain.ActionVoteSad:
-			r.Sad++
-		}
-		r.Voters = append(r.Voters, userName)
+		actions[userInfo] = action
 	}
-
 	err = rows.Err()
-	return &r, err
+	return actions, err
 }
