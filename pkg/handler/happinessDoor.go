@@ -81,7 +81,6 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 
 	log.Println("Form", r.Form)
 	payload, _ := url.QueryUnescape(r.Form.Get("payload"))
-	log.Println("Parsed payload", payload)
 	var result domain.InteractiveResponse
 
 	err = json.Unmarshal([]byte(payload), &result)
@@ -101,7 +100,6 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 	}
 
 	responseUrl := result.ResponseUrl
-	log.Println("Got response URL", responseUrl)
 
 	resp := domain.CreateSlackMessage(*hdr)
 	jsonBytes := toJson(resp)

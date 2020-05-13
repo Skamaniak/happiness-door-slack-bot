@@ -45,12 +45,6 @@ func context(element ...slack.MixedElement) *slack.ContextBlock {
 	return slack.NewContextBlock("", element...)
 }
 
-//func greenButton(id int, action string, text *slack.TextBlockObject) *slack.ButtonBlockElement {
-//	btn := button(id, action, text)
-//	btn.Style = "primary"
-//	return btn
-//}
-
 func appendVoters(blockSet []slack.Block, voters []UserInfo) []slack.Block {
 	var userElems []slack.MixedElement
 	for _, userInfo := range voters {
@@ -78,7 +72,6 @@ func createBlocks(hde HappinessDoorRecord) slack.Blocks {
 			Type: "section",
 			Text: markdownText("How did you find the *" + hde.Name + "* meeting?"),
 		},
-		context(markdownText("Feel free to leave an additional comment in a thread under this post")),
 		slack.DividerBlock{
 			Type: "divider",
 		},
@@ -109,6 +102,12 @@ func createBlocks(hde HappinessDoorRecord) slack.Blocks {
 		},
 	})
 	blockSet = appendVoters(blockSet, hde.SadVoters)
+	blockSet = append(blockSet,
+		slack.DividerBlock{
+			Type: "divider",
+		},
+		context(markdownText("Feel free to leave an additional comment in a thread under this post")),
+	)
 	return slack.Blocks{BlockSet: blockSet}
 }
 
