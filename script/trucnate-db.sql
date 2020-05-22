@@ -1,3 +1,2 @@
-TRUNCATE TABLE happiness_door_feedback;
 TRUNCATE TABLE happiness_door_user_action;
 TRUNCATE TABLE happiness_door;

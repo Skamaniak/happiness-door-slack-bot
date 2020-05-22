@@ -3,10 +3,7 @@ Simple Slack bot for measuring https://management30.com/practice/happiness-door/
 
 ## Deployment
 You need to set up a few ENV variables for the app to work
-- `DB_HOST` - Host of the PostgreSQL DB
-- `DB_NAME` - Name of the database
-- `DB_USER` - User to use when connecting to DB
-- `DB_PASSWORD` - Password for the user specified in `DB_USER`
+- `DATABASE_URL` - DB url (e.g. postgres://user:passwd@host:port/dbname)
 - `SLACK_TOKEN` - OAuth Slack token which can be found on the app configuration page in section `Install App` 
 
 ## Setting up slack application

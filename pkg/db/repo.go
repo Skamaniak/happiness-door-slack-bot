@@ -8,7 +8,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
-	"strconv"
+	"net/url"
+	"strings"
 )
 
 type HappinessDoor struct {
@@ -24,15 +25,19 @@ func NewHappinessDoor() (*HappinessDoor, error) {
 }
 
 func openDb() (*sql.DB, error) {
-	host := viper.GetString(conf.DbHost)
-	port := viper.GetInt(conf.DbPort)
-	user := viper.GetString(conf.DbUser)
-	password := viper.GetString(conf.DbPassword)
-	dbname := viper.GetString(conf.DbName)
+	dbUrl, err := url.Parse(viper.GetString(conf.DbUrl))
+	if err != nil {
+		return nil, err
+	}
 
-	log.Println("INFO: Connecting to db", dbname, "on host", host+":"+strconv.Itoa(port))
+	host := dbUrl.Hostname()
+	port := dbUrl.Port()
+	user := dbUrl.User.Username()
+	password, _ := dbUrl.User.Password()
+	dbname := strings.Trim(dbUrl.Path, "/")
 
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
+	log.Println("INFO: Connecting to db", dbname, "on host", host+":"+port)
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s",
 		host, port, user, password, dbname)
 
 	db, err := sql.Open("postgres", psqlInfo)
