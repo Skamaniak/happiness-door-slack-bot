@@ -1,12 +1,11 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
+	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -23,16 +22,16 @@ func NewHandlers(service *service.SlackService) *Handlers {
 func toJson(v interface{}) []byte {
 	jsonBytes, err := json.Marshal(v)
 	if err != nil {
-		log.Println("WARN: failed to marshal slack message to JSON")
+		logrus.WithError(err).Warn("Failed to marshal slack message to JSON")
 	}
 	return jsonBytes
 }
 
 func logRequest(r *http.Request) {
 	if requestBytes, err := httputil.DumpRequest(r, true); err != nil {
-		log.Println("Failed to parse request", err)
+		logrus.WithError(err).Warn("Failed to parse request")
 	} else {
-		log.Println(string(requestBytes))
+		logrus.Debug(string(requestBytes))
 	}
 }
 
@@ -51,21 +50,21 @@ func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 
 	slash, err := slack.SlashCommandParse(r)
 	if err != nil {
-		log.Println("WARN: Failed to parse request", err)
+		logrus.WithError(err).Warn("Failed to parse request")
 		return
 	}
 
 	meetingName := slash.Text
 	id, err := h.service.CreateHappinessDoor(meetingName)
 	if err != nil {
-		log.Println("WARN: Failed to create new happiness door record in db", err)
+		logrus.WithError(err).Warn("Failed to create new happiness door record in db")
 		return
 	}
 
 	message := domain.CreateSlackMessage(domain.StubRecord(id, meetingName))
 	err = writeResponse(message, w)
 	if err != nil {
-		log.Println("WARN: Failed to respond to request", err)
+		logrus.WithError(err).Warn("Failed to respond to request")
 	}
 }
 
@@ -75,37 +74,33 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		log.Println("WARN: Failed to parse form")
+		logrus.WithError(err).Warn("Failed to parse form")
 		return
 	}
 
-	log.Println("Form", r.Form)
+	logrus.WithField("Form", r.Form).Debug("Form parsed")
 	payload, _ := url.QueryUnescape(r.Form.Get("payload"))
 	var result domain.InteractiveResponse
 
 	err = json.Unmarshal([]byte(payload), &result)
 	if err != nil {
-		log.Println("WARN: Failed to parse response from payload parameter", err)
+		logrus.WithError(err).Warn("Failed to parse response from payload parameter")
 		return
 	}
 
 	id, err := h.service.IncrementVoting(result)
 	if err != nil {
-		log.Println("WARN: Failed to increment voting", err)
+		logrus.WithError(err).Warn("Failed to increment voting")
 	}
 
 	hdr, err := h.service.GetVoting(id)
 	if err != nil {
-		log.Println("WARN: Failed to increment voting", err)
+		logrus.WithError(err).WithField("HappinessDoorId", id).Warn("Failed to get voting stats")
 	}
 
 	responseUrl := result.ResponseUrl
-
 	resp := domain.CreateSlackMessage(*hdr)
 	jsonBytes := toJson(resp)
-	_, err = http.Post(responseUrl, "application/json", bytes.NewBuffer(jsonBytes)) //TODO move this to service layer
-	if err != nil {
-		log.Println("WARN: Failed to send http request to response URL")
-	}
 
+	h.service.SendToSlack(responseUrl, jsonBytes)
 }

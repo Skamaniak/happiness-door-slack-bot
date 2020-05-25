@@ -4,7 +4,7 @@ import (
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/client"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/db"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
-	"log"
+	"github.com/sirupsen/logrus"
 	"strconv"
 )
 
@@ -49,7 +49,7 @@ func (s *SlackService) GetVoting(hdId int) (*domain.HappinessDoorRecord, error) 
 	for userInfo, action := range actions {
 		userIcon, err := s.slackClient.GetUserIconUrl(userInfo.Id)
 		if err != nil {
-			log.Println("WARN: Failed to fetch icon for user", userInfo.Id, err)
+			logrus.WithError(err).WithField("UserId", userInfo.Id).Warn("Failed to fetch icon for user")
 		}
 		userInfo.ProfilePicture = userIcon
 		switch action {
@@ -89,6 +89,10 @@ func (s *SlackService) IncrementVoting(result domain.InteractiveResponse) (int, 
 		err = s.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
 	}
 	return id, err
+}
+
+func (s *SlackService) SendToSlack(url string, request []byte) {
+	s.slackClient.SendToSlack(url, request)
 }
 
 func (s *SlackService) InsertUserAction(hdId int, userId string, userName string, action string) error {

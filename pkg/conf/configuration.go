@@ -1,10 +1,13 @@
 package conf
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+)
 
 const AppPort = "PORT"
 const SlackToken = "SLACK_TOKEN"
 const DbUrl = "DATABASE_URL"
+const LogLevel = "LOG_LEVEL"
 
 func InitConfig() {
 	viper.AutomaticEnv()

@@ -45,7 +45,22 @@ func context(element ...slack.MixedElement) *slack.ContextBlock {
 	return slack.NewContextBlock("", element...)
 }
 
-func appendVoters(blockSet []slack.Block, voters []UserInfo) []slack.Block {
+func min(a int, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func splitIntoChunks(elems []slack.MixedElement, chunkSize int) [][]slack.MixedElement {
+	var chunks [][]slack.MixedElement
+	for i := 0; i < len(elems); i += chunkSize {
+		chunks = append(chunks, elems[i:min(i+chunkSize, len(elems))])
+	}
+	return chunks
+}
+
+func createVoterProfiles(voters []UserInfo) []slack.MixedElement {
 	var userElems []slack.MixedElement
 	for _, userInfo := range voters {
 		var userElem slack.MixedElement
@@ -56,11 +71,23 @@ func appendVoters(blockSet []slack.Block, voters []UserInfo) []slack.Block {
 		}
 		userElems = append(userElems, userElem)
 	}
+	return userElems
+}
+
+func appendVoters(blockSet []slack.Block, voters []UserInfo) []slack.Block {
+	userElems := createVoterProfiles(voters)
+
 	if len(userElems) > 0 {
-		votes := fmt.Sprintf(" - *%d votes*", len(voters))
-		userElems = append(userElems, markdownText(votes))
-		blockSet = append(blockSet, context(userElems...))
+		chunks := splitIntoChunks(userElems, 9)
+		for i, chunk := range chunks {
+			if i == len(chunks)-1 {
+				votes := fmt.Sprintf(" - *%d votes*", len(voters))
+				chunk = append(chunk, markdownText(votes))
+			}
+			blockSet = append(blockSet, context(chunk...))
+		}
 	}
+
 	return blockSet
 }
 

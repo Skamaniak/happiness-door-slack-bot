@@ -5,6 +5,7 @@ Simple Slack bot for measuring https://management30.com/practice/happiness-door/
 You need to set up a few ENV variables for the app to work
 - `DATABASE_URL` - DB url (e.g. postgres://user:passwd@host:port/dbname)
 - `SLACK_TOKEN` - OAuth Slack token which can be found on the app configuration page in section `Install App` 
+- `LOG_LEVEL` - Minimal level the app will log. Can be changed runtime. Default Log level is info.
 
 ## Setting up slack application
 #### Required permissions for the Slack app are

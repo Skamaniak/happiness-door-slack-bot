@@ -7,7 +7,7 @@ import (
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/handler"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
 	"github.com/gorilla/mux"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -27,7 +27,7 @@ func RunServer(port int) error {
 		Methods("POST")
 
 	hostPort := fmt.Sprintf(":%d", port)
-	log.Println("Registering handler to", hostPort)
+	logrus.WithField("Host", hostPort).Info("Registering handler")
 
 	err = http.ListenAndServe(hostPort, router)
 	return err

@@ -6,8 +6,8 @@ import (
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"log"
 	"net/url"
 	"strings"
 )
@@ -36,7 +36,11 @@ func openDb() (*sql.DB, error) {
 	password, _ := dbUrl.User.Password()
 	dbname := strings.Trim(dbUrl.Path, "/")
 
-	log.Println("INFO: Connecting to db", dbname, "on host", host+":"+port)
+	logrus.WithFields(logrus.Fields{
+		"DbName": dbname,
+		"User":   user,
+		"Host":   host + ":" + port,
+	}).Info("Connecting to db")
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s",
 		host, port, user, password, dbname)
 
@@ -50,7 +54,7 @@ func openDb() (*sql.DB, error) {
 		return nil, err
 	}
 
-	log.Println("INFO: Successfully connected to DB")
+	logrus.Info("Successfully connected to DB")
 	return db, nil
 }
 
