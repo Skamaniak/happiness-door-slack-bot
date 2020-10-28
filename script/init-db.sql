@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS happiness_door_feedback;
 DROP TABLE IF EXISTS happiness_door_user_action;
 DROP TABLE IF EXISTS happiness_door;
 
