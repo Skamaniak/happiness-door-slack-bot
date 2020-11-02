@@ -58,10 +58,10 @@ func openDb() (*sql.DB, error) {
 	return db, nil
 }
 
-func (hd *HappinessDoor) CreateHappinessDoor(name string) (int, error) {
-	sqlStatement := `INSERT INTO happiness_door(name) VALUES ($1) RETURNING id;`
+func (hd *HappinessDoor) CreateHappinessDoor(name string, token string) (int, error) {
+	sqlStatement := `INSERT INTO happiness_door(name, token) VALUES ($1, $2) RETURNING id;`
 	var id int
-	err := hd.db.QueryRow(sqlStatement, name).Scan(&id)
+	err := hd.db.QueryRow(sqlStatement, name, token).Scan(&id)
 	return id, err
 }
 

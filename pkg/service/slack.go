@@ -1,10 +1,14 @@
 package service
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/client"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/db"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"strconv"
 )
 
@@ -30,8 +34,18 @@ func extractHappinessDoorId(res domain.InteractiveResponse) int {
 	return i
 }
 
+func generateToken() string {
+	tl := viper.GetInt(conf.WebTokenLength)
+	b := make([]byte, tl/2)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
+
 func (s *SlackService) CreateHappinessDoor(meetingName string) (int, error) {
-	return s.repo.CreateHappinessDoor(meetingName)
+	token := generateToken()
+	return s.repo.CreateHappinessDoor(meetingName, token)
 }
 
 func (s *SlackService) GetVoting(hdId int) (*domain.HappinessDoorRecord, error) {
