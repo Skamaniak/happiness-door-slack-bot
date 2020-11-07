@@ -16,6 +16,12 @@ type HappinessDoor struct {
 	db *sql.DB
 }
 
+type HappinessDoorRecord struct {
+	MeetingName string
+	ChannelID   string
+	MessageTS   string
+}
+
 func NewHappinessDoor() (*HappinessDoor, error) {
 	db, err := openDb()
 	if err != nil {
@@ -58,33 +64,39 @@ func openDb() (*sql.DB, error) {
 	return db, nil
 }
 
-func (hd *HappinessDoor) CreateHappinessDoor(name string, token string) (int, error) {
-	sqlStatement := `INSERT INTO happiness_door(name, token) VALUES ($1, $2) RETURNING id;`
+func (hd *HappinessDoor) CreateHappinessDoor(name string, token string, cID string) (int, error) {
+	sqlStatement := `INSERT INTO happiness_door(name, token, channel_id) VALUES ($1, $2, $3) RETURNING id;`
 	var id int
-	err := hd.db.QueryRow(sqlStatement, name, token).Scan(&id)
+	err := hd.db.QueryRow(sqlStatement, name, token, cID).Scan(&id)
 	return id, err
 }
 
-func (hd *HappinessDoor) InsertUserAction(hdId int, userId string, userName string, action string) error {
+func (hd *HappinessDoor) SetMessageTS(hdID int, msgTS string) error {
+	sqlStatement := `UPDATE TABLE happiness_door SET message_ts = $1 WHERE id = $2;`
+	return hd.db.QueryRow(sqlStatement, msgTS, hdID).Scan()
+}
+
+func (hd *HappinessDoor) InsertUserAction(hdID int, userId string, userName string, action string) error {
 	sqlStatement :=
 		`INSERT INTO happiness_door_user_action(happiness_door_id, user_id, user_name, action_id) VALUES ($1, $2, $3, $4)
 			ON CONFLICT ON CONSTRAINT unique_user_vote DO UPDATE SET action_id = $4;`
 
-	_, err := hd.db.Exec(sqlStatement, hdId, userId, userName, action)
+	_, err := hd.db.Exec(sqlStatement, hdID, userId, userName, action)
 	return err
 }
 
-func (hd *HappinessDoor) GetMeetingName(hdId int) (string, error) {
-	var name string
-	err := hd.db.QueryRow("SELECT name FROM happiness_door WHERE id = $1;", hdId).Scan(&name)
-	return name, err
+func (hd *HappinessDoor) GetHappinessDoorRecord(hdID int) (HappinessDoorRecord, error) {
+	var r HappinessDoorRecord
+	err := hd.db.QueryRow("SELECT name, channel_id, message_ts FROM happiness_door WHERE id = $1;", hdID).
+		Scan(&r.MeetingName, &r.ChannelID, &r.MessageTS)
+	return r, err
 }
 
-func (hd *HappinessDoor) GetUserActions(hdId int) (map[domain.UserInfo]string, error) {
+func (hd *HappinessDoor) GetUserActions(hdID int) (map[domain.UserInfo]string, error) {
 	actions := make(map[domain.UserInfo]string)
 
 	rows, err := hd.db.Query(
-		"SELECT action_id, user_id, user_name from happiness_door_user_action WHERE happiness_door_id = $1 ORDER BY user_name ASC;", hdId)
+		"SELECT action_id, user_id, user_name from happiness_door_user_action WHERE happiness_door_id = $1 ORDER BY user_name ASC;", hdID)
 	if err != nil {
 		return actions, err
 	}

@@ -43,18 +43,65 @@ func generateToken() string {
 	return hex.EncodeToString(b)
 }
 
-func (s *SlackService) CreateHappinessDoor(meetingName string) (int, error) {
+func (s *SlackService) InitiateHappinessDoor(meetingName string, cID string) error {
 	token := generateToken()
-	return s.repo.CreateHappinessDoor(meetingName, token)
+	hdID, err := s.repo.CreateHappinessDoor(meetingName, token, cID)
+	if err != nil {
+		return err
+	}
+
+	msg := domain.CreateSlackMessage(domain.StubRecord(hdID, meetingName))
+	msgTS, err := s.slackClient.PostMessage(cID, msg)
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.SetMessageTS(hdID, msgTS)
+	return err
 }
 
-func (s *SlackService) GetVoting(hdId int) (*domain.HappinessDoorRecord, error) {
-	meetingName, err := s.repo.GetMeetingName(hdId)
+func (s *SlackService) IncrementVoting(result domain.InteractiveResponse) error {
+	action := extractAction(result)
+	hdID := extractHappinessDoorId(result)
+	user := result.User
+
+	var err error
+	switch action.Action {
+	case domain.ActionVoteHappy:
+		err = s.repo.InsertUserAction(hdID, user.Id, user.Name, action.Action)
+	case domain.ActionVoteNeutral:
+		err = s.repo.InsertUserAction(hdID, user.Id, user.Name, action.Action)
+	case domain.ActionVoteSad:
+		err = s.repo.InsertUserAction(hdID, user.Id, user.Name, action.Action)
+	}
+	if err != nil {
+		return err
+	}
+
+	return s.publishVotingToSlack(hdID)
+}
+
+func (s *SlackService) InsertUserAction(hdID int, userId string, userName string, action string) error {
+	return s.repo.InsertUserAction(hdID, userId, userName, action)
+}
+
+func (s *SlackService) publishVotingToSlack(hdID int) error {
+	hdr, err := s.computeVoting(hdID)
+	if err != nil {
+		logrus.WithError(err).WithField("HappinessDoorId", hdID).Warn("Failed to get voting stats")
+	}
+
+	msg := domain.CreateSlackMessage(*hdr)
+	return s.slackClient.ReplaceMessage(hdr.ChannelID, hdr.MessageTS, msg)
+}
+
+func (s *SlackService) computeVoting(hdID int) (*domain.HappinessDoorDto, error) {
+	hdr, err := s.repo.GetHappinessDoorRecord(hdID)
 	if err != nil {
 		return nil, err
 	}
 
-	actions, err := s.repo.GetUserActions(hdId)
+	actions, err := s.repo.GetUserActions(hdID)
 	if err != nil {
 		return nil, err
 	}
@@ -76,9 +123,11 @@ func (s *SlackService) GetVoting(hdId int) (*domain.HappinessDoorRecord, error) 
 		}
 	}
 
-	return &domain.HappinessDoorRecord{
-		Id:            hdId,
-		Name:          meetingName,
+	return &domain.HappinessDoorDto{
+		Id:            hdID,
+		Name:          hdr.MeetingName,
+		ChannelID:     hdr.ChannelID,
+		MessageTS:     hdr.MessageTS,
 		Happy:         len(happyVoters),
 		HappyVoters:   happyVoters,
 		Neutral:       len(neutralVoters),
@@ -86,29 +135,4 @@ func (s *SlackService) GetVoting(hdId int) (*domain.HappinessDoorRecord, error) 
 		Sad:           len(sadVoters),
 		SadVoters:     sadVoters,
 	}, nil
-}
-
-func (s *SlackService) IncrementVoting(result domain.InteractiveResponse) (int, error) {
-	action := extractAction(result)
-	id := extractHappinessDoorId(result)
-	user := result.User
-
-	var err error
-	switch action.Action {
-	case domain.ActionVoteHappy:
-		err = s.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
-	case domain.ActionVoteNeutral:
-		err = s.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
-	case domain.ActionVoteSad:
-		err = s.repo.InsertUserAction(id, user.Id, user.Name, action.Action)
-	}
-	return id, err
-}
-
-func (s *SlackService) SendToSlack(url string, request []byte) {
-	s.slackClient.SendToSlack(url, request)
-}
-
-func (s *SlackService) InsertUserAction(hdId int, userId string, userName string, action string) error {
-	return s.repo.InsertUserAction(hdId, userId, userName, action)
 }

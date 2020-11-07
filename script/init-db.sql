@@ -3,9 +3,11 @@ DROP TABLE IF EXISTS happiness_door;
 
 CREATE TABLE happiness_door
 (
-    id    SERIAL PRIMARY KEY,
-    name  VARCHAR(256) NOT NULL,
-    token VARCHAR(1024) NOT NULL
+    id         SERIAL PRIMARY KEY,
+    name       VARCHAR(256)  NOT NULL,
+    token      VARCHAR(1024) NOT NULL,
+    channel_id VARCHAR(16)   NOT NULL,
+    message_ts VARCHAR(24)
 );
 
 CREATE TABLE happiness_door_user_action

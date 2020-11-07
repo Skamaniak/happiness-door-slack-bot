@@ -54,3 +54,21 @@ func (_ *SlackClient) SendToSlack(url string, request []byte) {
 		logrus.WithFields(logrus.Fields{"Response": r}).Warn("Got unexpected response from Slack")
 	}
 }
+
+func (c *SlackClient) PostMessage(channelID string, msg slack.Blocks) (string, error) {
+	_, messageTS, err := c.api.PostMessage(channelID, slack.MsgOptionBlocks(msg.BlockSet...))
+	return messageTS, err
+}
+
+func (c *SlackClient) ReplaceMessage(channelID string, messageTS string, msg slack.Blocks) error {
+	_, _, _, err := c.api.UpdateMessage(channelID, messageTS, slack.MsgOptionBlocks(msg.BlockSet...))
+	return err
+}
+
+func (c *SlackClient) IsBotMember(channelID string) (bool, error) {
+	cnl, err := c.api.GetConversationInfo(channelID, false)
+	if err != nil {
+		return false, err
+	}
+	return cnl.IsMember, nil
+}

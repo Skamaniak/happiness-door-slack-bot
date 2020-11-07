@@ -6,9 +6,11 @@ type UserInfo struct {
 	ProfilePicture string
 }
 
-type HappinessDoorRecord struct {
+type HappinessDoorDto struct {
 	Id            int
 	Name          string
+	ChannelID     string
+	MessageTS     string
 	Happy         int
 	Neutral       int
 	Sad           int
@@ -33,6 +35,6 @@ type InteractiveResponse struct {
 	Actions     []Action `json:"actions"`
 }
 
-func StubRecord(id int, name string) HappinessDoorRecord {
-	return HappinessDoorRecord{Id: id, Name: name}
+func StubRecord(id int, name string) HappinessDoorDto {
+	return HappinessDoorDto{Id: id, Name: name}
 }
