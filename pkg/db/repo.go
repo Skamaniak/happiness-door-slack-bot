@@ -72,7 +72,7 @@ func (hd *HappinessDoor) CreateHappinessDoor(name string, token string, cID stri
 }
 
 func (hd *HappinessDoor) SetMessageTS(hdID int, msgTS string) error {
-	sqlStatement := `UPDATE TABLE happiness_door SET message_ts = $1 WHERE id = $2;`
+	sqlStatement := `UPDATE happiness_door SET message_ts = $1 WHERE id = $2;`
 	return hd.db.QueryRow(sqlStatement, msgTS, hdID).Scan()
 }
 
