@@ -8,6 +8,7 @@ import (
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/db"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	"github.com/sirupsen/logrus"
+	"github.com/slack-go/slack"
 	"github.com/spf13/viper"
 	"strconv"
 )
@@ -43,15 +44,16 @@ func generateToken() string {
 	return hex.EncodeToString(b)
 }
 
-func (s *SlackService) InitiateHappinessDoor(meetingName, cID, uID string) error {
-	member, err := s.isBotMember(cID)
+func (s *SlackService) InitiateHappinessDoor(meetingName, cID string) (*slack.Msg, error) {
+	canPost, err := s.canPostMessageToChannel(cID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if !member {
-		return s.sendNotAMember(cID, uID)
+	if !canPost {
+		msg := domain.CreateNotAMemberMessage(viper.GetString(conf.BotName))
+		return &msg, nil
 	}
-	return s.sendHappinessDoor(meetingName, cID)
+	return nil, s.sendHappinessDoor(meetingName, cID)
 }
 
 func (s *SlackService) IncrementVoting(result domain.InteractiveResponse) error {
@@ -79,11 +81,6 @@ func (s *SlackService) InsertUserAction(hdID int, userId string, userName string
 	return s.repo.InsertUserAction(hdID, userId, userName, action)
 }
 
-func (s *SlackService) sendNotAMember(cID, uID string) error {
-	msg := domain.CreateNotAMemberMessage(viper.GetString(conf.BotName))
-	return s.slackClient.PostEphemeralMessage(cID, uID, msg)
-}
-
 func (s *SlackService) sendHappinessDoor(meetingName string, cID string) error {
 	token := generateToken()
 	hdID, err := s.repo.CreateHappinessDoor(meetingName, token, cID)
@@ -91,7 +88,7 @@ func (s *SlackService) sendHappinessDoor(meetingName string, cID string) error {
 		return err
 	}
 
-	msg := domain.CreateHappinessDoorMessage(domain.StubRecord(hdID, meetingName))
+	msg := domain.CreateHappinessDoorContent(domain.StubRecord(hdID, meetingName))
 	msgTS, err := s.slackClient.PostMessage(cID, msg)
 	if err != nil {
 		return err
@@ -101,8 +98,8 @@ func (s *SlackService) sendHappinessDoor(meetingName string, cID string) error {
 	return err
 }
 
-func (s *SlackService) isBotMember(cID string) (bool, error) {
-	return s.slackClient.IsBotMember(cID)
+func (s *SlackService) canPostMessageToChannel(cID string) (bool, error) {
+	return s.slackClient.CanPostMessage(cID)
 }
 
 func (s *SlackService) publishVotingToSlack(hdID int) error {
@@ -111,7 +108,7 @@ func (s *SlackService) publishVotingToSlack(hdID int) error {
 		logrus.WithError(err).WithField("HappinessDoorId", hdID).Warn("Failed to get voting stats")
 	}
 
-	msg := domain.CreateHappinessDoorMessage(*hdr)
+	msg := domain.CreateHappinessDoorContent(*hdr)
 	return s.slackClient.ReplaceMessage(hdr.ChannelID, hdr.MessageTS, msg)
 }
 

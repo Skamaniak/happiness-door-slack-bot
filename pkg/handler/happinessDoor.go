@@ -27,7 +27,7 @@ func logRequest(r *http.Request) {
 	}
 }
 
-func (h *Handlers) Initiation(_ http.ResponseWriter, r *http.Request) {
+func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 	logRequest(r)
 	defer func() { _ = r.Body.Close() }()
 
@@ -37,11 +37,16 @@ func (h *Handlers) Initiation(_ http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.InitiateHappinessDoor(slash.Text, slash.ChannelID, slash.UserID)
-
+	resp, err := h.service.InitiateHappinessDoor(slash.Text, slash.ChannelID)
 	if err != nil {
-		logrus.WithError(err).Warn("Failed to create new happiness door record in db")
+		logrus.WithError(err).Warn("Failed to create new happiness door")
 		return
+	}
+	if resp != nil {
+		err = writeResponse(resp, w)
+		if err != nil {
+			logrus.WithError(err).Warn("Failed to respond to request")
+		}
 	}
 }
 
@@ -69,4 +74,21 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logrus.WithError(err).Warn("Failed to increment voting")
 	}
+}
+
+func toJson(v interface{}) []byte {
+	jsonBytes, err := json.Marshal(v)
+	if err != nil {
+		logrus.WithError(err).Warn("Failed to marshal slack message to JSON")
+	}
+	return jsonBytes
+}
+
+func writeResponse(response *slack.Msg, w http.ResponseWriter) error {
+	w.Header().
+		Set("Content-Type", "application/json")
+
+	jsonBytes := toJson(response)
+	_, err := w.Write(jsonBytes)
+	return err
 }

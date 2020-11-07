@@ -91,7 +91,7 @@ func appendVoters(blockSet []slack.Block, voters []UserInfo) []slack.Block {
 	return blockSet
 }
 
-func CreateHappinessDoorMessage(hde HappinessDoorDto) slack.Blocks {
+func CreateHappinessDoorContent(hde HappinessDoorDto) slack.Blocks {
 	var blockSet []slack.Block
 
 	blockSet = append(blockSet,
@@ -138,7 +138,7 @@ func CreateHappinessDoorMessage(hde HappinessDoorDto) slack.Blocks {
 	return slack.Blocks{BlockSet: blockSet}
 }
 
-func CreateNotAMemberMessage(botName string) slack.Blocks {
+func CreateNotAMemberMessage(botName string) slack.Msg {
 	var blockSet []slack.Block
 
 	blockSet = append(blockSet,
@@ -148,5 +148,5 @@ func CreateNotAMemberMessage(botName string) slack.Blocks {
 		},
 	)
 
-	return slack.Blocks{BlockSet: blockSet}
+	return slack.Msg{Blocks: slack.Blocks{BlockSet: blockSet}, ResponseType: slack.ResponseTypeEphemeral, ReplaceOriginal: true}
 }

@@ -70,10 +70,15 @@ func (c *SlackClient) ReplaceMessage(channelID string, messageTS string, msg sla
 	return err
 }
 
-func (c *SlackClient) IsBotMember(channelID string) (bool, error) {
+func (c *SlackClient) CanPostMessage(channelID string) (bool, error) {
 	cnl, err := c.api.GetConversationInfo(channelID, false)
 	if err != nil {
+		if err.Error() == "channel_not_found" {
+			// Not a member and channel is private
+			return false, nil
+		}
 		return false, err
 	}
-	return cnl.IsMember, nil
+
+	return !cnl.IsPrivate || cnl.IsMember, nil
 }
