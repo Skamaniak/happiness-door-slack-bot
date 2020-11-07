@@ -91,7 +91,7 @@ func appendVoters(blockSet []slack.Block, voters []UserInfo) []slack.Block {
 	return blockSet
 }
 
-func CreateSlackMessage(hde HappinessDoorDto) slack.Blocks {
+func CreateHappinessDoorMessage(hde HappinessDoorDto) slack.Blocks {
 	var blockSet []slack.Block
 
 	blockSet = append(blockSet,
@@ -135,5 +135,18 @@ func CreateSlackMessage(hde HappinessDoorDto) slack.Blocks {
 		},
 		context(markdownText("Feel free to leave an additional comment in a thread under this post")),
 	)
+	return slack.Blocks{BlockSet: blockSet}
+}
+
+func CreateNotAMemberMessage(botName string) slack.Blocks {
+	var blockSet []slack.Block
+
+	blockSet = append(blockSet,
+		slack.SectionBlock{
+			Type: "section",
+			Text: markdownText("Bot is not a member of this channel, please execute `/invite @" + botName + "` and try again."),
+		},
+	)
+
 	return slack.Blocks{BlockSet: blockSet}
 }

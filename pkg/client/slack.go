@@ -60,6 +60,11 @@ func (c *SlackClient) PostMessage(channelID string, msg slack.Blocks) (string, e
 	return messageTS, err
 }
 
+func (c *SlackClient) PostEphemeralMessage(channelID, userID string, msg slack.Blocks) error {
+	_, err := c.api.PostEphemeral(channelID, userID, slack.MsgOptionBlocks(msg.BlockSet...))
+	return err
+}
+
 func (c *SlackClient) ReplaceMessage(channelID string, messageTS string, msg slack.Blocks) error {
 	_, _, _, err := c.api.UpdateMessage(channelID, messageTS, slack.MsgOptionBlocks(msg.BlockSet...))
 	return err

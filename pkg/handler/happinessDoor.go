@@ -37,7 +37,7 @@ func (h *Handlers) Initiation(_ http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.InitiateHappinessDoor(slash.Text, slash.ChannelID)
+	err = h.service.InitiateHappinessDoor(slash.Text, slash.ChannelID, slash.UserID)
 
 	if err != nil {
 		logrus.WithError(err).Warn("Failed to create new happiness door record in db")

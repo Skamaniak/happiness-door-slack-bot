@@ -9,9 +9,13 @@ const SlackToken = "SLACK_TOKEN"
 const WebTokenLength = "WEB_TOKEN_LENGTH"
 const DbUrl = "DATABASE_URL"
 const LogLevel = "LOG_LEVEL"
+const BotName = "BOT_NAME"
 
 func InitConfig() {
 	viper.AutomaticEnv()
+
+	// Bot details
+	viper.SetDefault(BotName, "happiness_door_bot")
 
 	// Slack
 	viper.SetDefault(SlackToken, "")
