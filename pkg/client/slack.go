@@ -1,13 +1,11 @@
 package client
 
 import (
-	"bytes"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
 	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
 	"github.com/spf13/viper"
-	"net/http"
 	"time"
 )
 
@@ -43,26 +41,9 @@ func (c *SlackClient) GetUserIconUrl(userId string) (string, error) {
 	return iconUrl, nil
 }
 
-func (_ *SlackClient) SendToSlack(url string, request []byte) {
-	logrus.WithField("Url", url).Debug("Sending response to Slack")
-	r, err := http.Post(url, "application/json", bytes.NewBuffer(request))
-	defer func() { _ = r.Body.Close() }()
-	if err != nil {
-		logrus.WithError(err).Warn("Failed to send http request to response URL")
-	}
-	if r.StatusCode >= 400 {
-		logrus.WithFields(logrus.Fields{"Response": r}).Warn("Got unexpected response from Slack")
-	}
-}
-
 func (c *SlackClient) PostMessage(channelID string, msg slack.Blocks) (string, error) {
 	_, messageTS, err := c.api.PostMessage(channelID, slack.MsgOptionBlocks(msg.BlockSet...))
 	return messageTS, err
-}
-
-func (c *SlackClient) PostEphemeralMessage(channelID, userID string, msg slack.Blocks) error {
-	_, err := c.api.PostEphemeral(channelID, userID, slack.MsgOptionBlocks(msg.BlockSet...))
-	return err
 }
 
 func (c *SlackClient) ReplaceMessage(channelID string, messageTS string, msg slack.Blocks) error {

@@ -1,11 +1,12 @@
 import React, {Component} from "react";
 
-import {MessageType} from "../api/Protocol"
+import {createVoteMessage, MessageType} from "../api/Protocol"
 
 import Socket from '../api/Socket';
 import LoadingIndicator from "./LoadingIndicator";
 import NoAccess from "./NoAccess";
 import HappinessDoor from "./HappinessDoor";
+import {getAuthUrlParams} from "../util/auth";
 
 export default class App extends Component {
   constructor(props) {
@@ -18,8 +19,7 @@ export default class App extends Component {
   }
 
   backendUrl() {
-    const searchWithAuthTokens = window.location.search;
-    return 'ws://localhost:8081' + searchWithAuthTokens
+    return 'ws://localhost:8081' + getAuthUrlParams() //TODO add to config
   }
 
   registerHandlers(socket) {
@@ -48,11 +48,12 @@ export default class App extends Component {
     this.setState({error: true});
   }
 
-  // helloFromClient() {
-  //   if (this.state.connected) {
-  //     this.state.socket.emit(MessageType.toBackend.helloFromClient, 'hello server!');
-  //   }
-  // }
+  onVote(action) {
+    if (this.state.connected) {
+      const message = createVoteMessage(action);
+      this.state.socket.emit(MessageType.toBackend.voting, message);
+    }
+  }
 
   happinessDoorData(data) {
     this.setState({happinessDoor: data})
@@ -78,7 +79,7 @@ export default class App extends Component {
       return this.renderLoadingIndicator();
     }
     return (
-      <HappinessDoor meetingName={this.state.happinessDoor.Name}/>
+      <HappinessDoor happinessDoor={this.state.happinessDoor} onVote={(a) => this.onVote(a)}/>
     )
   }
 }

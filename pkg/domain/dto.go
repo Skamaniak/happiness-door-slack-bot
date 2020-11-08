@@ -30,9 +30,8 @@ type User struct {
 }
 
 type InteractiveResponse struct {
-	ResponseUrl string   `json:"response_url"`
-	User        User     `json:"user"`
-	Actions     []Action `json:"actions"`
+	User    User     `json:"user"`
+	Actions []Action `json:"actions"`
 }
 
 func StubRecord(id int, name string) HappinessDoorDto {

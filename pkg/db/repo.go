@@ -93,6 +93,12 @@ func (hd *HappinessDoor) GetHappinessDoorRecord(hdID int) (HappinessDoorRecord, 
 	return r, err
 }
 
+func (hd *HappinessDoor) HappinessDoorExists(hdId, token string) (bool, error) {
+	var count int
+	err := hd.db.QueryRow("SELECT count(1) FROM happiness_door WHERE id = $1 AND token = $2", hdId, token).Scan(&count)
+	return count != 0, err
+}
+
 func (hd *HappinessDoor) GetUserActions(hdID int) (map[domain.UserInfo]string, error) {
 	actions := make(map[domain.UserInfo]string)
 

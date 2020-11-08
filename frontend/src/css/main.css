@@ -2,5 +2,19 @@
     /*display: grid;*/
     /*grid-template-columns:  auto 300px auto;*/
     /*grid-template-rows:  auto 300px auto;*/
+    color: #1d1c1d;
+    font-family: LatoWeb, sans-serif;
+    font-style: normal;
+    font-size: 15px;
 }
 
+/* Webfont: Lato-Regular */@font-face {
+    font-family: 'LatoWeb';
+    src: url('../font/lato/Lato-Regular.eot'); /* IE9 Compat Modes */
+    src: url('../font/lato/Lato-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('../font/lato/Lato-Regular.woff2') format('woff2'), /* Modern Browsers */
+    url('../font/lato/Lato-Regular.woff') format('woff'), /* Modern Browsers */
+    url('../font/lato/Lato-Regular.ttf') format('truetype');
+    font-style: normal;
+    font-weight: normal;
+}

@@ -16,12 +16,14 @@ import (
 type SlackService struct {
 	repo        *db.HappinessDoor
 	slackClient *client.SlackClient
+	pubSub      *happinessDoorPubSub
 }
 
 func NewSlackService(repo *db.HappinessDoor, slackClient *client.SlackClient) *SlackService {
 	return &SlackService{
 		repo:        repo,
 		slackClient: slackClient,
+		pubSub:      newPubsub(),
 	}
 }
 
@@ -74,11 +76,7 @@ func (s *SlackService) IncrementVoting(result domain.InteractiveResponse) error 
 		return err
 	}
 
-	return s.publishVotingToSlack(hdID)
-}
-
-func (s *SlackService) InsertUserAction(hdID int, userId string, userName string, action string) error {
-	return s.repo.InsertUserAction(hdID, userId, userName, action)
+	return s.publishVoting(hdID)
 }
 
 func (s *SlackService) sendHappinessDoor(meetingName string, cID string) error {
@@ -102,25 +100,26 @@ func (s *SlackService) canPostMessageToChannel(cID string) (bool, error) {
 	return s.slackClient.CanPostMessage(cID)
 }
 
-func (s *SlackService) publishVotingToSlack(hdID int) error {
-	hdr, err := s.computeVoting(hdID)
+func (s *SlackService) publishVoting(hdID int) error {
+	hdr, err := s.ComputeVoting(hdID)
 	if err != nil {
 		logrus.WithError(err).WithField("HappinessDoorId", hdID).Warn("Failed to get voting stats")
 	}
 
-	msg := domain.CreateHappinessDoorContent(*hdr)
+	s.pubSub.publish(hdr)
+	msg := domain.CreateHappinessDoorContent(hdr)
 	return s.slackClient.ReplaceMessage(hdr.ChannelID, hdr.MessageTS, msg)
 }
 
-func (s *SlackService) computeVoting(hdID int) (*domain.HappinessDoorDto, error) {
+func (s *SlackService) ComputeVoting(hdID int) (domain.HappinessDoorDto, error) {
 	hdr, err := s.repo.GetHappinessDoorRecord(hdID)
 	if err != nil {
-		return nil, err
+		return domain.HappinessDoorDto{}, err
 	}
 
 	actions, err := s.repo.GetUserActions(hdID)
 	if err != nil {
-		return nil, err
+		return domain.HappinessDoorDto{}, err
 	}
 
 	var happyVoters, neutralVoters, sadVoters []domain.UserInfo
@@ -140,7 +139,7 @@ func (s *SlackService) computeVoting(hdID int) (*domain.HappinessDoorDto, error)
 		}
 	}
 
-	return &domain.HappinessDoorDto{
+	return domain.HappinessDoorDto{
 		Id:            hdID,
 		Name:          hdr.MeetingName,
 		ChannelID:     hdr.ChannelID,
@@ -152,4 +151,16 @@ func (s *SlackService) computeVoting(hdID int) (*domain.HappinessDoorDto, error)
 		Sad:           len(sadVoters),
 		SadVoters:     sadVoters,
 	}, nil
+}
+
+func (s *SlackService) VerifyToken(hdId, token string) (bool, error) {
+	return s.repo.HappinessDoorExists(hdId, token)
+}
+
+func (s *SlackService) SubscribeHappinessDoorFeed(hdID int) <-chan domain.HappinessDoorDto {
+	return s.pubSub.subscribe(hdID)
+}
+
+func (s *SlackService) UnsubscribeHappinessDoorFeed(hdID int, ch <-chan domain.HappinessDoorDto) {
+	s.pubSub.unsubscribe(hdID, ch)
 }

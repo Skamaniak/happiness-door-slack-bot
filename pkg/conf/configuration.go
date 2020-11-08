@@ -4,7 +4,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppPort = "PORT"
+const RestPort = "REST_PORT"
+const WsPort = "WS_PORT"
 const SlackToken = "SLACK_TOKEN"
 const WebTokenLength = "WEB_TOKEN_LENGTH"
 const DbUrl = "DATABASE_URL"
@@ -21,10 +22,11 @@ func InitConfig() {
 	viper.SetDefault(SlackToken, "")
 
 	// App details
-	viper.SetDefault(AppPort, 8080)
+	viper.SetDefault(RestPort, 8080)
 
 	// Access from web
 	viper.SetDefault(WebTokenLength, 128)
+	viper.SetDefault(WsPort, 8081)
 
 	// DB connection
 	viper.SetDefault(DbUrl, "postgres://postgres:@localhost:5432/happiness-door")
