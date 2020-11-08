@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const RestPort = "REST_PORT"
+const RestPort = "PORT"
 const WsPort = "WS_PORT"
 const SlackToken = "SLACK_TOKEN"
 const WebTokenLength = "WEB_TOKEN_LENGTH"
