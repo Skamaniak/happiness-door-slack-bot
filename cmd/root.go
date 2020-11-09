@@ -1,11 +1,16 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/client"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/db"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/server"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -20,9 +25,11 @@ func createSlackService() (*service.SlackService, error) {
 	return service.NewSlackService(repo, slackClient), nil
 }
 
-func initServer(runServer func() error) {
+func startServer(r *mux.Router) {
 	go func() {
-		err := runServer()
+		hostPort := fmt.Sprintf(":%d", viper.GetInt(conf.Port))
+		logrus.WithField("Host", hostPort).Info("Registering HTTP handler")
+		err := http.ListenAndServe(hostPort, r)
 		if err != nil {
 			logrus.WithError(err).Panic("Failed to initialise server.")
 		}
@@ -41,15 +48,10 @@ func Run() {
 		logrus.WithError(err).Panic("Failed to create Slack service.")
 	}
 
-	// Run Web Socket for frontend communication
-	initServer(func() error {
-		return server.RunWsServer(s)
-	})
-
-	// Main HTTP server
-	initServer(func() error {
-		return server.RunRestServer(s)
-	})
+	r := mux.NewRouter()
+	server.RegisterREST(r, s)
+	server.RegisterWS(r, s)
+	startServer(r)
 
 	//TODO admin server
 
