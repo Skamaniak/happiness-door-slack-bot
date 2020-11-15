@@ -5,7 +5,6 @@ import (
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/log"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func main() {
@@ -13,6 +12,5 @@ func main() {
 	conf.InitConfig()
 	log.InitLogging()
 
-	port := viper.GetInt(conf.AppPort)
-	cmd.Run(port)
+	cmd.Run()
 }

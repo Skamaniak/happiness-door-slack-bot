@@ -1,13 +1,16 @@
 import React, {Component} from "react";
 
-import {MessageType} from "../api/Protocol"
-
+import {createVoteMessage, MessageType} from "../api/Protocol"
+import {getAuthUrlParams} from "../util/auth";
+import {config} from "../config";
+import UserStore from "../userStore";
 import Socket from '../api/Socket';
 import LoadingIndicator from "./LoadingIndicator";
 import NoAccess from "./NoAccess";
 import HappinessDoor from "./HappinessDoor";
+import SlackUserBar from "./SlackUserBar";
 
-export default class App extends Component {
+class App extends Component {
   constructor(props) {
     super(props);
 
@@ -18,8 +21,11 @@ export default class App extends Component {
   }
 
   backendUrl() {
-    const searchWithAuthTokens = window.location.search;
-    return 'ws://localhost:8081' + searchWithAuthTokens
+    let authParams = getAuthUrlParams();
+    if (authParams) {
+      authParams += "&u=" + UserStore.getUser();
+    }
+    return config.backendUrl + authParams;
   }
 
   registerHandlers(socket) {
@@ -27,13 +33,30 @@ export default class App extends Component {
   }
 
   componentDidMount() {
+    this.connect();
+  }
+
+  connect() {
     let socket = new Socket(this.backendUrl());
     this.setState({socket})
 
     socket.on('connect', () => this.onConnect());
-    socket.on('disconnect', () => this.onDisconnect());
+    socket.on('disconnect', (e) => this.onDisconnect(e));
     socket.on('error', () => this.onError());
+    socket.close();
     this.registerHandlers(socket);
+  }
+
+  disconnect() {
+    if (this.state.connected) {
+      this.state.socket.close();
+    }
+    this.setState({error: false})
+  }
+
+  reconnect() {
+    this.disconnect();
+    this.connect();
   }
 
   onConnect() {
@@ -48,11 +71,12 @@ export default class App extends Component {
     this.setState({error: true});
   }
 
-  // helloFromClient() {
-  //   if (this.state.connected) {
-  //     this.state.socket.emit(MessageType.toBackend.helloFromClient, 'hello server!');
-  //   }
-  // }
+  onVote(action) {
+    if (this.state.connected) {
+      const message = createVoteMessage(action);
+      this.state.socket.emit(MessageType.toBackend.voting, message);
+    }
+  }
 
   happinessDoorData(data) {
     this.setState({happinessDoor: data})
@@ -66,7 +90,10 @@ export default class App extends Component {
 
   renderAccessDenied() {
     return (
-      <NoAccess/>
+      <>
+        <SlackUserBar onUserChange={() => this.reconnect()}/>
+        <NoAccess/>
+      </>
     )
   }
 
@@ -78,7 +105,14 @@ export default class App extends Component {
       return this.renderLoadingIndicator();
     }
     return (
-      <HappinessDoor meetingName={this.state.happinessDoor.Name}/>
+      <>
+        <SlackUserBar onUserChange={() => this.reconnect()}/>
+        <HappinessDoor happinessDoor={this.state.happinessDoor}
+                       onVote={(a) => this.onVote(a)}
+                       onUserChange={() => this.reconnect()}/>
+      </>
     )
   }
 }
+
+export default App;

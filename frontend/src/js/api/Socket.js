@@ -11,7 +11,7 @@ export default class Socket {
       this.webSocket.onclose = this.close.bind(this);
       this.webSocket.onerror = this.error.bind(this);
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   };
 
@@ -37,7 +37,7 @@ export default class Socket {
 
   // error handles an error on a websocket.
   error(e) {
-    console.log("websocket error: ", e);
+    console.error("websocket error", e);
     this.eventEmitter.emit('error', e);
   }
 

@@ -1,4 +1,4 @@
-package handler
+package api
 
 import (
 	"encoding/json"
@@ -11,12 +11,12 @@ import (
 	"net/url"
 )
 
-type Handlers struct {
+type RestHandlers struct {
 	service *service.SlackService
 }
 
-func NewHandlers(service *service.SlackService) *Handlers {
-	return &Handlers{service: service}
+func NewRestHandlers(service *service.SlackService) *RestHandlers {
+	return &RestHandlers{service: service}
 }
 
 func logRequest(r *http.Request) {
@@ -27,7 +27,7 @@ func logRequest(r *http.Request) {
 	}
 }
 
-func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
+func (h *RestHandlers) Initiation(w http.ResponseWriter, r *http.Request) {
 	logRequest(r)
 	defer func() { _ = r.Body.Close() }()
 
@@ -50,7 +50,7 @@ func (h *Handlers) Initiation(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
+func (h *RestHandlers) Vote(_ http.ResponseWriter, r *http.Request) {
 	logRequest(r)
 	defer func() { _ = r.Body.Close() }()
 
@@ -70,7 +70,7 @@ func (h *Handlers) Vote(_ http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.IncrementVoting(result)
+	err = h.service.SlackVoting(result)
 	if err != nil {
 		logrus.WithError(err).Warn("Failed to increment voting")
 	}

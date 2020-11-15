@@ -16,12 +16,14 @@ import (
 type SlackService struct {
 	repo        *db.HappinessDoor
 	slackClient *client.SlackClient
+	pubSub      *happinessDoorPubSub
 }
 
 func NewSlackService(repo *db.HappinessDoor, slackClient *client.SlackClient) *SlackService {
 	return &SlackService{
 		repo:        repo,
 		slackClient: slackClient,
+		pubSub:      newPubsub(),
 	}
 }
 
@@ -29,8 +31,8 @@ func extractAction(res domain.InteractiveResponse) domain.Action {
 	return res.Actions[0]
 }
 
-func extractHappinessDoorId(res domain.InteractiveResponse) int {
-	id := extractAction(res).Identifier
+func extractHappinessDoorId(action domain.Action) int {
+	id := action.Identifier
 	i, _ := strconv.Atoi(id)
 	return i
 }
@@ -56,29 +58,44 @@ func (s *SlackService) InitiateHappinessDoor(meetingName, cID string) (*slack.Ms
 	return nil, s.sendHappinessDoor(meetingName, cID)
 }
 
-func (s *SlackService) IncrementVoting(result domain.InteractiveResponse) error {
-	action := extractAction(result)
-	hdID := extractHappinessDoorId(result)
-	user := result.User
+func (s *SlackService) SlackVoting(result domain.InteractiveResponse) error {
+	a := extractAction(result)
+	u, err := s.slackClient.GetUserById(result.User.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return s.vote(u, a)
+}
+
+func (s *SlackService) WebVoting(ue string, a domain.Action) error {
+	u, err := s.slackClient.GetUserById(ue)
+
+	if err != nil {
+		return err
+	}
+
+	return s.vote(u, a)
+}
+
+func (s *SlackService) vote(user client.SlackUser, a domain.Action) error {
+	hdID := extractHappinessDoorId(a)
 
 	var err error
-	switch action.Action {
+	switch a.Action {
 	case domain.ActionVoteHappy:
-		err = s.repo.InsertUserAction(hdID, user.Id, user.Name, action.Action)
+		err = s.repo.InsertUserAction(hdID, user.UID, user.Name, a.Action)
 	case domain.ActionVoteNeutral:
-		err = s.repo.InsertUserAction(hdID, user.Id, user.Name, action.Action)
+		err = s.repo.InsertUserAction(hdID, user.UID, user.Name, a.Action)
 	case domain.ActionVoteSad:
-		err = s.repo.InsertUserAction(hdID, user.Id, user.Name, action.Action)
+		err = s.repo.InsertUserAction(hdID, user.UID, user.Name, a.Action)
 	}
 	if err != nil {
 		return err
 	}
 
-	return s.publishVotingToSlack(hdID)
-}
-
-func (s *SlackService) InsertUserAction(hdID int, userId string, userName string, action string) error {
-	return s.repo.InsertUserAction(hdID, userId, userName, action)
+	return s.publishVoting(hdID)
 }
 
 func (s *SlackService) sendHappinessDoor(meetingName string, cID string) error {
@@ -102,45 +119,46 @@ func (s *SlackService) canPostMessageToChannel(cID string) (bool, error) {
 	return s.slackClient.CanPostMessage(cID)
 }
 
-func (s *SlackService) publishVotingToSlack(hdID int) error {
-	hdr, err := s.computeVoting(hdID)
+func (s *SlackService) publishVoting(hdID int) error {
+	hdr, err := s.ComputeVoting(hdID)
 	if err != nil {
 		logrus.WithError(err).WithField("HappinessDoorId", hdID).Warn("Failed to get voting stats")
 	}
 
-	msg := domain.CreateHappinessDoorContent(*hdr)
+	s.pubSub.publish(hdr)
+	msg := domain.CreateHappinessDoorContent(hdr)
 	return s.slackClient.ReplaceMessage(hdr.ChannelID, hdr.MessageTS, msg)
 }
 
-func (s *SlackService) computeVoting(hdID int) (*domain.HappinessDoorDto, error) {
+func (s *SlackService) ComputeVoting(hdID int) (domain.HappinessDoorDto, error) {
 	hdr, err := s.repo.GetHappinessDoorRecord(hdID)
 	if err != nil {
-		return nil, err
+		return domain.HappinessDoorDto{}, err
 	}
 
 	actions, err := s.repo.GetUserActions(hdID)
 	if err != nil {
-		return nil, err
+		return domain.HappinessDoorDto{}, err
 	}
 
-	var happyVoters, neutralVoters, sadVoters []domain.UserInfo
-	for userInfo, action := range actions {
-		userIcon, err := s.slackClient.GetUserIconUrl(userInfo.Id)
+	var happyVoters, neutralVoters, sadVoters []domain.UserVotingAction
+	for _, action := range actions {
+		user, err := s.slackClient.GetUserById(action.Id)
 		if err != nil {
-			logrus.WithError(err).WithField("UserId", userInfo.Id).Warn("Failed to fetch icon for user")
+			logrus.WithError(err).WithField("UserId", action.Id).Warn("Failed to fetch icon for user")
 		}
-		userInfo.ProfilePicture = userIcon
-		switch action {
+		action.ProfilePicture = user.IconUrl
+		switch action.Action {
 		case domain.ActionVoteHappy:
-			happyVoters = append(happyVoters, userInfo)
+			happyVoters = append(happyVoters, action)
 		case domain.ActionVoteNeutral:
-			neutralVoters = append(neutralVoters, userInfo)
+			neutralVoters = append(neutralVoters, action)
 		case domain.ActionVoteSad:
-			sadVoters = append(sadVoters, userInfo)
+			sadVoters = append(sadVoters, action)
 		}
 	}
 
-	return &domain.HappinessDoorDto{
+	return domain.HappinessDoorDto{
 		Id:            hdID,
 		Name:          hdr.MeetingName,
 		ChannelID:     hdr.ChannelID,
@@ -152,4 +170,21 @@ func (s *SlackService) computeVoting(hdID int) (*domain.HappinessDoorDto, error)
 		Sad:           len(sadVoters),
 		SadVoters:     sadVoters,
 	}, nil
+}
+
+func (s *SlackService) VerifyToken(hdId int, token string) (bool, error) {
+	return s.repo.HappinessDoorExists(hdId, token)
+}
+
+func (s *SlackService) VerifySlackUser(email string) bool {
+	_, err := s.slackClient.GetUserByEmail(email) //TODO handle error better (Slack call failure is taken as unverified user)
+	return err == nil
+}
+
+func (s *SlackService) SubscribeHappinessDoorFeed(hdID int) <-chan domain.HappinessDoorDto {
+	return s.pubSub.subscribe(hdID)
+}
+
+func (s *SlackService) UnsubscribeHappinessDoorFeed(hdID int, ch <-chan domain.HappinessDoorDto) {
+	s.pubSub.unsubscribe(hdID, ch)
 }
