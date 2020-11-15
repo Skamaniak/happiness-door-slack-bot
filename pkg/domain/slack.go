@@ -133,7 +133,10 @@ func CreateHappinessDoorContent(hde HappinessDoorDto) slack.Blocks {
 		slack.DividerBlock{
 			Type: "divider",
 		},
-		context(markdownText("Feel free to leave an additional comment in a thread under this post")),
+		context(
+			markdownText(fmt.Sprintf("Share this happiness door via email using a <%s|web link>.", hde.WebLink)),
+			markdownText("Feel free to leave an additional comment in a thread under this post."),
+		),
 	)
 	return slack.Blocks{BlockSet: blockSet}
 }

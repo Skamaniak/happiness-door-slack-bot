@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
 	"github.com/spf13/viper"
+	"net/url"
 	"strconv"
 )
 
@@ -169,6 +170,7 @@ func (s *SlackService) ComputeVoting(hdID int) (domain.HappinessDoorDto, error) 
 		NeutralVoters: neutralVoters,
 		Sad:           len(sadVoters),
 		SadVoters:     sadVoters,
+		WebLink:       createWebUrl(hdr),
 	}, nil
 }
 
@@ -187,4 +189,16 @@ func (s *SlackService) SubscribeHappinessDoorFeed(hdID int) <-chan domain.Happin
 
 func (s *SlackService) UnsubscribeHappinessDoorFeed(hdID int, ch <-chan domain.HappinessDoorDto) {
 	s.pubSub.unsubscribe(hdID, ch)
+}
+
+func createWebUrl(hdr db.HappinessDoorRecord) string {
+	webUrl := url.URL{
+		Scheme: viper.GetString(conf.WebScheme),
+		Host:   viper.GetString(conf.WebHost),
+	}
+	q := webUrl.Query()
+	q.Add("i", strconv.Itoa(hdr.Id))
+	q.Add("t", hdr.Token)
+	webUrl.RawQuery = q.Encode()
+	return webUrl.String()
 }

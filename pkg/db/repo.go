@@ -17,9 +17,11 @@ type HappinessDoor struct {
 }
 
 type HappinessDoorRecord struct {
+	Id          int
 	MeetingName string
 	ChannelID   string
 	MessageTS   string
+	Token       string
 }
 
 func NewHappinessDoor() (*HappinessDoor, error) {
@@ -88,8 +90,8 @@ func (hd *HappinessDoor) InsertUserAction(hdID int, userId string, userName stri
 
 func (hd *HappinessDoor) GetHappinessDoorRecord(hdID int) (HappinessDoorRecord, error) {
 	var r HappinessDoorRecord
-	err := hd.db.QueryRow("SELECT name, channel_id, message_ts FROM happiness_door WHERE id = $1;", hdID).
-		Scan(&r.MeetingName, &r.ChannelID, &r.MessageTS)
+	err := hd.db.QueryRow("SELECT id, name, token, channel_id, message_ts FROM happiness_door WHERE id = $1;", hdID).
+		Scan(&r.Id, &r.MeetingName, &r.Token, &r.ChannelID, &r.MessageTS)
 	return r, err
 }
 

@@ -7,6 +7,8 @@ import (
 const Port = "PORT"
 const SlackToken = "SLACK_TOKEN"
 const WebTokenLength = "WEB_TOKEN_LENGTH"
+const WebHost = "WEB_HOST"
+const WebScheme = "WEB_SCHEME"
 const DbUrl = "DATABASE_URL"
 const LogLevel = "LOG_LEVEL"
 const BotName = "BOT_NAME"
@@ -23,8 +25,10 @@ func InitConfig() {
 	// App details
 	viper.SetDefault(Port, 8080)
 
-	// Web auth
+	// Web
 	viper.SetDefault(WebTokenLength, 128)
+	viper.SetDefault(WebHost, "localhost:8090")
+	viper.SetDefault(WebScheme, "http")
 
 	// DB connection
 	viper.SetDefault(DbUrl, "postgres://postgres:@localhost:5432/happiness-door")

@@ -20,6 +20,7 @@ type HappinessDoorDto struct {
 	HappyVoters   []UserVotingAction
 	NeutralVoters []UserVotingAction
 	SadVoters     []UserVotingAction
+	WebLink       string
 }
 
 type Action struct {
