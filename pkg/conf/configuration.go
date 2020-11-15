@@ -27,7 +27,7 @@ func InitConfig() {
 
 	// Web
 	viper.SetDefault(WebTokenLength, 128)
-	viper.SetDefault(WebHost, "localhost:8090")
+	viper.SetDefault(WebHost, "localhost:9080")
 	viper.SetDefault(WebScheme, "http")
 
 	// DB connection
