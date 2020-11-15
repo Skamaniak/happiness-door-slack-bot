@@ -1,5 +1,4 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
-const webpack = require('webpack')
 
 module.exports = {
   module: {
@@ -57,16 +56,23 @@ module.exports = {
             }
           }
         ]
+      },
+      // img loader
+      {
+        test: /\.(jpe?g|gif|png|svg)$/i,
+        use: [
+          {
+            loader: 'url-loader'
+          }
+        ]
       }
     ]
   },
   plugins: [
     new HtmlWebPackPlugin({
+      favicon: "./src/img/favicon.png",
       template: "./src/index.html",
       filename: "./index.html"
-    }),
-    new webpack.DefinePlugin({
-      'process.env.REACT_SPINKIT_NO_STYLES': false
     })
   ],
   devServer: {

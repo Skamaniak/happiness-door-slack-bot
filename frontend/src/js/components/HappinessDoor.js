@@ -23,17 +23,17 @@ class HappinessDoor extends Component {
 
 
         <VoteOption
-          emojiUrl={"https://a.slack-edge.com/production-standard-emoji-assets/10.2/google-medium/1f642.png"}
+          type={"happy"}
           optionText={"I'm happy"}
           voters={happinessDoor.HappyVoters}
           onVote={() => onVote(VotingAction.happy)}/>
         <VoteOption
-          emojiUrl={"https://a.slack-edge.com/production-standard-emoji-assets/10.2/google-medium/1f610.png"}
+          type={"neutral"}
           optionText={"Neither good nor bad"}
           voters={happinessDoor.NeutralVoters}
           onVote={() => onVote(VotingAction.neutral)}/>
         <VoteOption
-          emojiUrl={"https://a.slack-edge.com/production-standard-emoji-assets/10.2/google-medium/1f61e.png"}
+          type={"sad"}
           optionText={"I did not like it"}
           voters={happinessDoor.SadVoters}
           onVote={() => onVote(VotingAction.sad)}/>

@@ -1,0 +1,12 @@
+https://snassr.io/post/0002_goreactsockets/
+
+!!!
+Validations
+Icons
+small screen rescale
+New line after 10 votes
+web socket going away warn
+
+
+
+<http://www.example.com|This message *is* a link>
