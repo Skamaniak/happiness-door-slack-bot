@@ -70,7 +70,7 @@ func (h *RestHandlers) Vote(_ http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.IncrementVoting(result)
+	err = h.service.SlackVoting(result)
 	if err != nil {
 		logrus.WithError(err).Warn("Failed to increment voting")
 	}

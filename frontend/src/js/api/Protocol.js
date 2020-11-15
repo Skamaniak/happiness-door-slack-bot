@@ -1,4 +1,4 @@
-import {getHappinessDoorId, getJsonCookie} from "../util/auth";
+import {getHappinessDoorId} from "../util/auth";
 
 export const MessageType = {
   fromBackend: {
@@ -18,15 +18,8 @@ export const VotingAction = {
 
 // TODO: this needs to be taken from OAUTH or cookie
 export const createVoteMessage = (action) => {
-  const user = getJsonCookie("happiness-door-user")
-
   return {
-    "user": user,
-    "actions": [
-      {
-        "action_id": action,
-        "value": getHappinessDoorId()
-      }
-    ]
+    "action_id": action,
+    "value": getHappinessDoorId()
   }
 }

@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 import styles from "../../css/modules/vote.option.module.css"
+import {Row, Col, Button} from "react-bootstrap";
 
 class VoteOption extends Component {
 
@@ -32,16 +33,23 @@ class VoteOption extends Component {
     let {emojiUrl, optionText, voters, onVote} = this.props
     voters = voters || [];
     return (
-      <div>
-        <div>
-          <img src={emojiUrl} alt={optionText} title={optionText}/>
-          {optionText}
-          <input type="button" value="Vote" onClick={onVote}/>
-        </div>
-
-        {this.renderVoterIcons(voters)}
-        {this.renderVoteCount(voters)}
-      </div>
+      <>
+        <Row className={styles.voteRow}>
+          <Col md={{ span: 5, offset: 3}}>
+            <img src={emojiUrl} alt={optionText} title={optionText}/>
+            {optionText}
+          </Col>
+          <Col >
+            <Button size="sm" variant="outline-dark" onClick={onVote}>Select</Button>
+          </Col>
+        </Row>
+        <Row>
+          <Col md={{ span: 5, offset: 3 }}>
+            {this.renderVoterIcons(voters)}
+            {this.renderVoteCount(voters)}
+          </Col>
+        </Row>
+      </>
     );
   }
 }

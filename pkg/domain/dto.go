@@ -1,9 +1,12 @@
 package domain
 
-type UserInfo struct {
+import "fmt"
+
+type UserVotingAction struct {
 	Id             string
 	Name           string
 	ProfilePicture string
+	Action         string
 }
 
 type HappinessDoorDto struct {
@@ -14,9 +17,9 @@ type HappinessDoorDto struct {
 	Happy         int
 	Neutral       int
 	Sad           int
-	HappyVoters   []UserInfo
-	NeutralVoters []UserInfo
-	SadVoters     []UserInfo
+	HappyVoters   []UserVotingAction
+	NeutralVoters []UserVotingAction
+	SadVoters     []UserVotingAction
 }
 
 type Action struct {
@@ -25,13 +28,22 @@ type Action struct {
 }
 
 type User struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id string `json:"id"`
 }
 
 type InteractiveResponse struct {
 	User    User     `json:"user"`
 	Actions []Action `json:"actions"`
+}
+
+type WsAuth struct {
+	UserEmail string
+	HdID      int
+	Token     string
+}
+
+func (a WsAuth) String() string {
+	return fmt.Sprintf("userEmail: %s, hdId: %d, token: %s", a.UserEmail, a.HdID, a.Token)
 }
 
 func StubRecord(id int, name string) HappinessDoorDto {

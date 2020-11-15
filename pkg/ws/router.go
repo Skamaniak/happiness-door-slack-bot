@@ -3,6 +3,7 @@ package ws
 import (
 	"errors"
 	"fmt"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
@@ -37,51 +38,77 @@ func NewRouter(s *service.SlackService) *Router {
 
 // ServeHTTP creates the socket connection and begins the read routine.
 func (rt *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	hdId, proceed := rt.authRequest(w, r)
+	auth, proceed := rt.authRequest(w, r)
 	if !proceed {
 		return
 	}
-
-	rt.establishWs(hdId, w, r)
+	rt.establishWs(auth, w, r)
 }
 
-func (rt *Router) authRequest(w http.ResponseWriter, r *http.Request) (int, bool) {
-	token, err := extractQueryParameter("t", r)
-	if err != nil {
-		logrus.WithError(err).Warn("Failed to authenticate request.")
-		w.WriteHeader(401)
-		return 0, false
-	}
-	hdId, err := extractQueryParameter("i", r)
+func (rt *Router) authRequest(w http.ResponseWriter, r *http.Request) (domain.WsAuth, bool) {
+	auth, err := rt.extractAuth(r)
 	if err != nil {
 		logrus.WithError(err).
-			WithField("token", token).
+			WithField("auth", auth).
 			Warn("Failed to authenticate request.")
 		w.WriteHeader(401)
-		return 0, false
+		return auth, false
 	}
-	verified, err := rt.service.VerifyToken(hdId, token)
+
+	verified, err := rt.verifyAuth(auth)
 	if err != nil {
 		logrus.WithError(err).
-			WithField("token", token).
-			WithField("hdId", hdId).
-			Error("Token verification failed.")
+			WithField("auth", auth).
+			Error("Auth verification failed.")
 		w.WriteHeader(500)
-		return 0, false
+		return auth, false
 	}
 	if !verified {
 		logrus.WithError(err).
-			WithField("token", token).
-			WithField("hdId", hdId).
-			Warn("Provided token is not valid.")
+			WithField("auth", auth).
+			Warn("Provided auth details are not valid.")
 		w.WriteHeader(401)
-		return 0, false
+		return auth, false
 	}
-	id, _ := strconv.Atoi(hdId)
-	return id, true
+
+	return auth, true
 }
 
-func (rt *Router) establishWs(hdID int, w http.ResponseWriter, r *http.Request) {
+func (rt *Router) extractAuth(r *http.Request) (domain.WsAuth, error) {
+	res := domain.WsAuth{}
+	t, err := extractQueryParameter("t", r)
+	if err != nil {
+		return res, err
+	}
+	res.Token = t
+
+	id, err := extractQueryParameter("i", r)
+	if err != nil {
+		return res, err
+	}
+	res.HdID, err = strconv.Atoi(id)
+	if err != nil {
+		return res, err
+	}
+
+	ue, err := extractQueryParameter("u", r) //TODO this will be Google OAuth JWT in the future
+	if err != nil {
+		return res, err
+	}
+	res.UserEmail = ue
+
+	return res, nil
+}
+
+func (rt *Router) verifyAuth(auth domain.WsAuth) (bool, error) {
+	verified, err := rt.service.VerifyToken(auth.HdID, auth.Token)
+	if err != nil || !verified {
+		return verified, err
+	}
+	return rt.service.VerifySlackUser(auth.UserEmail), nil
+}
+
+func (rt *Router) establishWs(auth domain.WsAuth, w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -99,25 +126,25 @@ func (rt *Router) establishWs(hdID int, w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	ws := NewWS(socket, rt.findHandler)
-	err = rt.sendInitData(ws, hdID)
+	ws := NewWS(socket, auth, rt.findHandler)
+	err = rt.sendInitData(ws)
 	if err != nil {
 		logrus.WithError(err).Warn("Failed to send initial data to socket.")
 	}
 
-	feed := rt.service.SubscribeHappinessDoorFeed(hdID)
+	feed := rt.service.SubscribeHappinessDoorFeed(auth.HdID)
 	go func() {
 		for hd := range feed {
 			ws.Write(Message{Name: happinessDoorData, Data: hd})
 		}
 	}()
 	ws.InitReadLoop(func() {
-		rt.service.UnsubscribeHappinessDoorFeed(hdID, feed)
+		rt.service.UnsubscribeHappinessDoorFeed(auth.HdID, feed)
 	})
 }
 
-func (rt *Router) sendInitData(s *Socket, hdID int) error {
-	hd, err := rt.service.ComputeVoting(hdID)
+func (rt *Router) sendInitData(s *Socket) error {
+	hd, err := rt.service.ComputeVoting(s.AuthContext.HdID)
 	if err != nil {
 		return err
 	}

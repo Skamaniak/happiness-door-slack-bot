@@ -60,7 +60,7 @@ func splitIntoChunks(elems []slack.MixedElement, chunkSize int) [][]slack.MixedE
 	return chunks
 }
 
-func createVoterProfiles(voters []UserInfo) []slack.MixedElement {
+func createVoterProfiles(voters []UserVotingAction) []slack.MixedElement {
 	var userElems []slack.MixedElement
 	for _, userInfo := range voters {
 		var userElem slack.MixedElement
@@ -74,7 +74,7 @@ func createVoterProfiles(voters []UserInfo) []slack.MixedElement {
 	return userElems
 }
 
-func appendVoters(blockSet []slack.Block, voters []UserInfo) []slack.Block {
+func appendVoters(blockSet []slack.Block, voters []UserVotingAction) []slack.Block {
 	userElems := createVoterProfiles(voters)
 
 	if len(userElems) > 0 {

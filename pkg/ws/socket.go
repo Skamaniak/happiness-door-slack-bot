@@ -2,6 +2,7 @@ package ws
 
 import (
 	"fmt"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 )
@@ -24,14 +25,16 @@ type FindHandler func(Event) (Handler, bool)
 
 // Socket is a type that reads and writes on sockets.
 type Socket struct {
+	AuthContext domain.WsAuth
 	socket      *websocket.Conn
 	findHandler FindHandler
 }
 
 // NewClient accepts a socket and returns an initialized Socket.
-func NewWS(socket *websocket.Conn, findHandler FindHandler) *Socket {
+func NewWS(socket *websocket.Conn, auth domain.WsAuth, findHandler FindHandler) *Socket {
 	return &Socket{
 		socket:      socket,
+		AuthContext: auth,
 		findHandler: findHandler,
 	}
 }

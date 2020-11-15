@@ -93,14 +93,14 @@ func (hd *HappinessDoor) GetHappinessDoorRecord(hdID int) (HappinessDoorRecord, 
 	return r, err
 }
 
-func (hd *HappinessDoor) HappinessDoorExists(hdId, token string) (bool, error) {
+func (hd *HappinessDoor) HappinessDoorExists(hdId int, token string) (bool, error) {
 	var count int
 	err := hd.db.QueryRow("SELECT count(1) FROM happiness_door WHERE id = $1 AND token = $2", hdId, token).Scan(&count)
 	return count != 0, err
 }
 
-func (hd *HappinessDoor) GetUserActions(hdID int) (map[domain.UserInfo]string, error) {
-	actions := make(map[domain.UserInfo]string)
+func (hd *HappinessDoor) GetUserActions(hdID int) ([]domain.UserVotingAction, error) {
+	var actions []domain.UserVotingAction
 
 	rows, err := hd.db.Query(
 		"SELECT action_id, user_id, user_name from happiness_door_user_action WHERE happiness_door_id = $1 ORDER BY user_name ASC;", hdID)
@@ -110,13 +110,12 @@ func (hd *HappinessDoor) GetUserActions(hdID int) (map[domain.UserInfo]string, e
 
 	defer func() { _ = rows.Close() }()
 	for rows.Next() {
-		var userInfo domain.UserInfo
-		var action string
-		err := rows.Scan(&action, &userInfo.Id, &userInfo.Name)
+		var userAction domain.UserVotingAction
+		err := rows.Scan(&userAction.Action, &userAction.Id, &userAction.Name)
 		if err != nil {
 			return actions, err
 		}
-		actions[userInfo] = action
+		actions = append(actions, userAction)
 	}
 	err = rows.Err()
 	return actions, err

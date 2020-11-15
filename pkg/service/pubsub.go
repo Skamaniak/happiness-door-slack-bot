@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -36,6 +37,11 @@ func (ps *happinessDoorPubSub) subscribe(hdID int) <-chan domain.HappinessDoorDt
 
 	ch := make(chan domain.HappinessDoorDto, 1)
 	ps.subs[hdID] = append(ps.subs[hdID], ch)
+
+	logrus.WithField("hdID", hdID).
+		WithField("chan", ch).
+		WithField("hdIDSubs", len(ps.subs[hdID])).
+		Debug("New listener subscribed.")
 	return ch
 }
 
@@ -46,8 +52,15 @@ func (ps *happinessDoorPubSub) unsubscribe(hdID int, ch <-chan domain.HappinessD
 	ind, found := ps.getSubIndex(hdID, ch)
 	if found {
 		close(ps.subs[hdID][ind])
-		ps.subs[hdID] = append(ps.subs[hdID][:ind], ps.subs[hdID][ind:]...)
+		hdSubs := ps.subs[hdID]
+		hdSubs[ind] = hdSubs[len(hdSubs)-1]
+		ps.subs[hdID] = hdSubs[:len(hdSubs)-1]
 	}
+	logrus.WithField("hdID", hdID).
+		WithField("chan", ch).
+		WithField("found", found).
+		WithField("hdIDSubs", len(ps.subs[hdID])).
+		Debug("Listener unsubscribed.")
 }
 
 func (ps *happinessDoorPubSub) close() {
