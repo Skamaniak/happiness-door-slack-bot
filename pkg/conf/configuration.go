@@ -4,14 +4,21 @@ import (
 	"github.com/spf13/viper"
 )
 
-const Port = "PORT"
-const SlackToken = "SLACK_TOKEN"
-const WebTokenLength = "WEB_TOKEN_LENGTH"
-const WebHost = "WEB_HOST"
-const WebScheme = "WEB_SCHEME"
-const DbUrl = "DATABASE_URL"
-const LogLevel = "LOG_LEVEL"
-const BotName = "BOT_NAME"
+const (
+	Port                 = "PORT"
+	SlackToken           = "SLACK_TOKEN"
+	DbUrl                = "DATABASE_URL"
+	LogLevel             = "LOG_LEVEL"
+	BotName              = "BOT_NAME"
+	RESTApiPrefix        = "REST_API_PREFIX"
+	WebTokenLength       = "WEB_TOKEN_LENGTH"
+	WebHost              = "WEB_HOST"
+	WebScheme            = "WEB_SCHEME"
+	WebFolder            = "WEB_FOLDER"
+	WebFileServerEnabled = "WEB_FILE_SERVER_ENABLED"
+	WebFileServerPrefix  = "WEB_FILE_SERVER_PREFIX"
+	WebApiPrefix         = "WEB_API_PREFIX"
+)
 
 func InitConfig() {
 	viper.AutomaticEnv()
@@ -25,10 +32,18 @@ func InitConfig() {
 	// App details
 	viper.SetDefault(Port, 8080)
 
+	// REST
+	viper.SetDefault(RESTApiPrefix, "/rest/v1")
+
 	// Web
 	viper.SetDefault(WebTokenLength, 128)
 	viper.SetDefault(WebHost, "localhost:9080")
 	viper.SetDefault(WebScheme, "http")
+	viper.SetDefault(WebApiPrefix, "/ws/v1")
+
+	viper.SetDefault(WebFileServerEnabled, true)
+	viper.SetDefault(WebFolder, "./frontend/dist")
+	viper.SetDefault(WebFileServerPrefix, "/")
 
 	// DB connection
 	viper.SetDefault(DbUrl, "postgres://postgres:@localhost:5432/happiness-door")

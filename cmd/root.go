@@ -51,6 +51,7 @@ func Run() {
 	r := mux.NewRouter()
 	server.RegisterREST(r, s)
 	server.RegisterWS(r, s)
+	server.RegisterWeb(r)
 	startServer(r)
 
 	//TODO admin server
