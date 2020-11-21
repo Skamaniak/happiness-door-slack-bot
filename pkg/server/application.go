@@ -2,23 +2,44 @@ package server
 
 import (
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/api"
+	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
 	"github.com/Skamaniak/happiness-door-slack-bot/pkg/ws"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"net/http"
 )
 
 func RegisterREST(r *mux.Router, s *service.SlackService) {
-	handlers := api.NewRestHandlers(s)
+	p := viper.GetString(conf.RESTApiPrefix)
+	logrus.WithField("prefix", p).Info("Registering REST API.")
 
-	r.HandleFunc("/rest/v1/happiness-door", handlers.Initiation).
+	handlers := api.NewRestHandlers(s)
+	r.HandleFunc(p+"/happiness-door", handlers.Initiation).
 		Methods("POST")
-	r.HandleFunc("/rest/v1/happiness-door/interaction", handlers.Vote).
+	r.HandleFunc(p+"/happiness-door/interaction", handlers.Vote).
 		Methods("POST")
 }
 
 func RegisterWS(r *mux.Router, s *service.SlackService) {
+	p := viper.GetString(conf.WebApiPrefix)
+	logrus.WithField("prefix", p).Info("Registering web socket API.")
+
 	wsRouter := ws.NewRouter(s)
 	handlers := api.NewWSHandlers(s)
 	wsRouter.Handle(handlers.CreateVoteHandler())
-	r.Handle("/ws/v1/connect", wsRouter)
+	r.Handle(p+"/connect", wsRouter)
+}
+
+func RegisterWeb(r *mux.Router) {
+	if viper.GetBool(conf.WebFileServerEnabled) {
+		p := viper.GetString(conf.WebFileServerPrefix)
+		logrus.WithField("prefix", p).Info("Registering WEB file server.")
+
+		wf := viper.GetString(conf.WebFolder)
+		fs := http.FileServer(http.Dir(wf))
+
+		r.PathPrefix(p).Handler(http.StripPrefix(p, fs))
+	}
 }

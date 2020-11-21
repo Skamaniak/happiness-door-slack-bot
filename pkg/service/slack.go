@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"
 	"github.com/spf13/viper"
+	"net/url"
 	"strconv"
 )
 
@@ -105,7 +106,8 @@ func (s *SlackService) sendHappinessDoor(meetingName string, cID string) error {
 		return err
 	}
 
-	msg := domain.CreateHappinessDoorContent(domain.StubRecord(hdID, meetingName))
+	webLink := createWebUrl(hdID, token)
+	msg := domain.CreateHappinessDoorContent(domain.StubRecord(hdID, meetingName, webLink))
 	msgTS, err := s.slackClient.PostMessage(cID, msg)
 	if err != nil {
 		return err
@@ -169,6 +171,7 @@ func (s *SlackService) ComputeVoting(hdID int) (domain.HappinessDoorDto, error) 
 		NeutralVoters: neutralVoters,
 		Sad:           len(sadVoters),
 		SadVoters:     sadVoters,
+		WebLink:       createWebUrl(hdr.Id, hdr.Token),
 	}, nil
 }
 
@@ -187,4 +190,19 @@ func (s *SlackService) SubscribeHappinessDoorFeed(hdID int) <-chan domain.Happin
 
 func (s *SlackService) UnsubscribeHappinessDoorFeed(hdID int, ch <-chan domain.HappinessDoorDto) {
 	s.pubSub.unsubscribe(hdID, ch)
+}
+
+func createWebUrl(hdID int, token string) string {
+	webUrl := url.URL{
+		Scheme: viper.GetString(conf.WebScheme),
+		Host:   viper.GetString(conf.WebHost),
+	}
+	q := webUrl.Query()
+	q.Add("i", strconv.Itoa(hdID))
+	q.Add("t", token)
+	webUrl.RawQuery = q.Encode()
+
+	s := webUrl.String()
+	logrus.WithField("url", s).Debug("Web URL generated.")
+	return s
 }

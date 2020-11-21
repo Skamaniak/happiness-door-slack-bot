@@ -2,6 +2,9 @@ import React, {Component} from "react";
 import PropTypes from "prop-types";
 import styles from "../../css/modules/vote.option.module.css"
 import {Row, Col, Button} from "react-bootstrap";
+import HappyEmoji from "../../img/emoji_happy.png"
+import NeutralEmoji from "../../img/emoji_neutral.png"
+import SadEmoji from "../../img/emoji_sad.png"
 
 class VoteOption extends Component {
 
@@ -29,15 +32,26 @@ class VoteOption extends Component {
     }
   }
 
+  getEmoji(type) {
+    if (type === "happy") {
+      return HappyEmoji;
+    } else if (type === "neutral") {
+      return NeutralEmoji;
+    }
+    return SadEmoji;
+  }
+
   render() {
-    let {emojiUrl, optionText, voters, onVote} = this.props
+    let {type, optionText, voters, onVote} = this.props
     voters = voters || [];
+
     return (
       <>
         <Row className={styles.voteRow}>
           <Col md={{ span: 5, offset: 3}}>
-            <img src={emojiUrl} alt={optionText} title={optionText}/>
-            {optionText}
+            <img src={this.getEmoji(type)} className={styles.emojiPicture} alt={optionText} title={optionText}/>
+            &nbsp;
+            <span>{optionText}</span>
           </Col>
           <Col >
             <Button size="sm" variant="outline-dark" onClick={onVote}>Select</Button>
@@ -55,7 +69,7 @@ class VoteOption extends Component {
 }
 
 VoteOption.propTypes = {
-  emojiUrl: PropTypes.string,
+  type: PropTypes.string,
   optionText: PropTypes.string,
   voters: PropTypes.arrayOf(PropTypes.object),
   onVote: PropTypes.func

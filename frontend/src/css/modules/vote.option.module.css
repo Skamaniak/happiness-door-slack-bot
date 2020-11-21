@@ -5,6 +5,11 @@
     margin-right: 5px;
 }
 
+.emojiPicture {
+    width: 22px;
+    height: 22px;
+}
+
 .voteRow {
     padding-top: 10px;
 }

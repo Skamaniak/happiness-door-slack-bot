@@ -6,12 +6,20 @@ You need to set up a few ENV variables for the app to work
 - `DATABASE_URL` - DB url (e.g. postgres://user:passwd@host:port/dbname)
 - `SLACK_TOKEN` - OAuth Slack token which can be found on the app configuration page in section `Install App` 
 - `LOG_LEVEL` - Minimal level the app will log. Can be changed runtime. Default Log level is info.
+- `WEB_HOST` - The domain of the web frontend part (e.g. <app_name>.herokuapp.com)
+
+You can also customise other variables to make the experience better. For example
+- `BOT_NAME` - this should be set to the slack name of the bot. E.g. `happiness_door_bot`. You can find the bot name in slack app management under `Features > App Home > Your App’s Presence in Slack`.
+
+For more config options please see [configuration.go](pkg/conf/configuration.go).
 
 ## Setting up slack application
 #### Required permissions for the Slack app are
 - `chat:write` - To paste and replace message in chat
+- `chat:write.public` - To post happiness door messages to public channels the bot is not a member of
 - `commands` - To register the /happiness-door command
 - `users.profile:read` - To read user profile pictures and using them in voting
+- `groups:read` and `channels:read` - To find out if the bot can post the message and notify the user about inviting the bot into the channel (typically private ones)
 
 #### Basic app details
 - App name: `Happiness Door Bot`

@@ -20,6 +20,7 @@ type HappinessDoorDto struct {
 	HappyVoters   []UserVotingAction
 	NeutralVoters []UserVotingAction
 	SadVoters     []UserVotingAction
+	WebLink       string
 }
 
 type Action struct {
@@ -46,6 +47,6 @@ func (a WsAuth) String() string {
 	return fmt.Sprintf("userEmail: %s, hdId: %d, token: %s", a.UserEmail, a.HdID, a.Token)
 }
 
-func StubRecord(id int, name string) HappinessDoorDto {
-	return HappinessDoorDto{Id: id, Name: name}
+func StubRecord(id int, name string, webLink string) HappinessDoorDto {
+	return HappinessDoorDto{Id: id, Name: name, WebLink: webLink}
 }
