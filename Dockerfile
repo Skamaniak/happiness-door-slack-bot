@@ -28,5 +28,7 @@ WORKDIR /app
 COPY --from=backend-builder /happiness-door-slack-bot/out/happiness-door-slack-bot ./happiness-door-slack-bot
 COPY --from=frontend-builder /happiness-door-slack-bot-frontend/dist ./happiness-door-slack-bot-frontend
 
+ENV WEB_FOLDER=./happiness-door-slack-bot-frontend
+
 EXPOSE 8080
-ENTRYPOINT ["./happiness-door-slack-bot"]
+CMD ./happiness-door-slack-bot
