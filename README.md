@@ -8,6 +8,11 @@ You need to set up a few ENV variables for the app to work
 - `LOG_LEVEL` - Minimal level the app will log. Can be changed runtime. Default Log level is info.
 - `WEB_HOST` - The domain of the web frontend part (e.g. <app_name>.herokuapp.com)
 
+You can also customise other variables to make the experience better. For example
+- `BOT_NAME` - this should be set to the slack name of the bot. E.g. `happiness_door_bot`. You can find the bot name in slack app management under `Features > App Home > Your App’s Presence in Slack`.
+
+For more config options please see [configuration.go](pkg/conf/configuration.go).
+
 ## Setting up slack application
 #### Required permissions for the Slack app are
 - `chat:write` - To paste and replace message in chat
