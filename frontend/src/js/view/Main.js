@@ -2,9 +2,7 @@ import React, {Component} from "react";
 import App from "../components/App";
 import UserStore from "../userStore";
 import SlackUserBar from "../components/SlackUserBar";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import {Alert, Col, Container, Row} from "react-bootstrap";
 
 export default class MainView extends Component {
   constructor(props) {
@@ -26,10 +24,12 @@ export default class MainView extends Component {
         <SlackUserBar onUserChange={() => this.onUserChange()}/>
         <Row>
           <Col>
-            <p>You do not have your email address set yet. Email address is used to identify Slack user so we can do
-              bi-directional state syncing. Fill in your email address first please.</p>
-            <p>We do not validate if it is really your email address so please be honest and do not try to impersonate
-              other people.</p>
+            <Alert variant={"info"}>
+              You do not have your email address set yet. Email address is used to identify Slack user so we can do
+              bi-directional state syncing. Please fill in your email address in the top right corner. We do not
+              validate if it is really your email address so please be honest and do not try to impersonate
+              other people.
+            </Alert>
           </Col>
         </Row>
       </>
