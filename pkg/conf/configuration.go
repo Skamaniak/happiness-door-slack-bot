@@ -37,7 +37,7 @@ func InitConfig() {
 
 	// Web
 	viper.SetDefault(WebTokenLength, 128)
-	viper.SetDefault(WebHost, "localhost:9080")
+	viper.SetDefault(WebHost, "localhost:"+viper.GetString(Port))
 	viper.SetDefault(WebScheme, "http")
 	viper.SetDefault(WebApiPrefix, "/ws/v1")
 
