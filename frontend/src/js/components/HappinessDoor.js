@@ -13,7 +13,7 @@ class HappinessDoor extends Component {
     return (
       <>
         <Row>
-          <Col md={{span: 6, offset: 3}}>
+          <Col xl={{span: 6, offset: 3}} lg={{span: 12}} md={{span: 12}} sm={{span: 12}} xs={{span: 12}}>
             <div className={styles.title}>How did you find the <span
               className={styles.meetingName}>{happinessDoor.Name}</span> meeting?
             </div>
@@ -37,7 +37,7 @@ class HappinessDoor extends Component {
           optionText={"I did not like it"}
           voters={happinessDoor.SadVoters}
           onVote={() => onVote(VotingAction.sad)}/>
-        <Col md={{span: 6, offset: 3}}>
+        <Col xl={{span: 6, offset: 3}} lg={{span: 12}} md={{span: 12}} sm={{span: 12}} xs={{span: 12}}>
           <hr/>
         </Col>
       </>

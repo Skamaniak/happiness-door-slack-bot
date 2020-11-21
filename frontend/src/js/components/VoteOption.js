@@ -48,7 +48,7 @@ class VoteOption extends Component {
     return (
       <>
         <Row className={styles.voteRow}>
-          <Col md={{ span: 5, offset: 3}}>
+          <Col xl={{ span: 5, offset: 3}} lg={{ span: 10}} md={{ span: 10}} sm={{ span: 10 }} xs={{ span: 10 }}>
             <img src={this.getEmoji(type)} className={styles.emojiPicture} alt={optionText} title={optionText}/>
             &nbsp;
             <span>{optionText}</span>
@@ -58,7 +58,7 @@ class VoteOption extends Component {
           </Col>
         </Row>
         <Row>
-          <Col md={{ span: 5, offset: 3 }}>
+          <Col xl={{ span: 5, offset: 3}} lg={{ span: 10}} md={{ span: 10}} sm={{ span: 10 }} xs={{ span: 10 }}>
             {this.renderVoterIcons(voters)}
             {this.renderVoteCount(voters)}
           </Col>
