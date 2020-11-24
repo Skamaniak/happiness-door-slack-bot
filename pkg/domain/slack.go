@@ -64,10 +64,15 @@ func createVoterProfiles(voters []UserVotingAction) []slack.MixedElement {
 	var userElems []slack.MixedElement
 	for _, userInfo := range voters {
 		var userElem slack.MixedElement
+		userName := userInfo.Name
+		if len(userName) == 0 {
+			userName = "-"
+		}
+
 		if userInfo.ProfilePicture != "" {
-			userElem = image(userInfo.ProfilePicture, userInfo.Name)
+			userElem = image(userInfo.ProfilePicture, userName)
 		} else {
-			userElem = plainText(userInfo.Name)
+			userElem = plainText(userName)
 		}
 		userElems = append(userElems, userElem)
 	}

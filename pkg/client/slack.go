@@ -91,5 +91,5 @@ func (c *SlackClient) CanPostMessage(channelID string) (bool, error) {
 }
 
 func userFromProfile(uID string, p slack.UserProfile) SlackUser {
-	return SlackUser{UID: uID, Email: p.Email, Name: p.DisplayName, IconUrl: p.Image48}
+	return SlackUser{UID: uID, Email: p.Email, Name: p.RealName, IconUrl: p.Image48}
 }
