@@ -63,8 +63,12 @@ class App extends Component {
     this.setState({connected: true});
   }
 
-  onDisconnect() {
+  onDisconnect(e) {
     this.setState({connected: false});
+
+    if (e.code === 1006 && !this.state.error) {
+      this.reconnect();
+    }
   }
 
   onError() {
