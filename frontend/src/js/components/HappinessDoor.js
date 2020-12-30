@@ -21,7 +21,6 @@ class HappinessDoor extends Component {
           </Col>
         </Row>
 
-
         <VoteOption
           type={"happy"}
           optionText={"I'm happy"}

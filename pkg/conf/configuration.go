@@ -2,22 +2,25 @@ package conf
 
 import (
 	"github.com/spf13/viper"
+	"time"
 )
 
 const (
-	Port                 = "PORT"
-	SlackToken           = "SLACK_TOKEN"
-	DbUrl                = "DATABASE_URL"
-	LogLevel             = "LOG_LEVEL"
-	BotName              = "BOT_NAME"
-	RESTApiPrefix        = "REST_API_PREFIX"
-	WebTokenLength       = "WEB_TOKEN_LENGTH"
-	WebHost              = "WEB_HOST"
-	WebScheme            = "WEB_SCHEME"
-	WebFolder            = "WEB_FOLDER"
-	WebFileServerEnabled = "WEB_FILE_SERVER_ENABLED"
-	WebFileServerPrefix  = "WEB_FILE_SERVER_PREFIX"
-	WebApiPrefix         = "WEB_API_PREFIX"
+	Port                      = "PORT"
+	SlackToken                = "SLACK_TOKEN"
+	DbUrl                     = "DATABASE_URL"
+	LogLevel                  = "LOG_LEVEL"
+	BotName                   = "BOT_NAME"
+	RESTApiPrefix             = "REST_API_PREFIX"
+	WebTokenLength            = "WEB_TOKEN_LENGTH"
+	WebHost                   = "WEB_HOST"
+	WebScheme                 = "WEB_SCHEME"
+	WebFolder                 = "WEB_FOLDER"
+	WebFileServerEnabled      = "WEB_FILE_SERVER_ENABLED"
+	WebFileServerPrefix       = "WEB_FILE_SERVER_PREFIX"
+	WebApiPrefix              = "WEB_API_PREFIX"
+	WebSocketPingPongInterval = "WEB_PING_PONG_INTERVAL"
+	WebSocketMaxPingPongDelay = "WEB_PING_PONG_MAX_DELAY"
 )
 
 func InitConfig() {
@@ -40,6 +43,8 @@ func InitConfig() {
 	viper.SetDefault(WebHost, "localhost:"+viper.GetString(Port))
 	viper.SetDefault(WebScheme, "http")
 	viper.SetDefault(WebApiPrefix, "/ws/v1")
+	viper.SetDefault(WebSocketPingPongInterval, 30*time.Second)
+	viper.SetDefault(WebSocketMaxPingPongDelay, viper.GetDuration(WebSocketPingPongInterval)*3)
 
 	viper.SetDefault(WebFileServerEnabled, true)
 	viper.SetDefault(WebFolder, "./frontend/dist")

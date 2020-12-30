@@ -138,7 +138,7 @@ func (rt *Router) establishWs(auth domain.WsAuth, w http.ResponseWriter, r *http
 			ws.Write(Message{Name: happinessDoorData, Data: hd})
 		}
 	}()
-	ws.InitReadLoop(func() {
+	ws.Loop(func() {
 		rt.service.UnsubscribeHappinessDoorFeed(auth.HdID, feed)
 	})
 }

@@ -42,8 +42,8 @@ class App extends Component {
 
     socket.on('connect', () => this.onConnect());
     socket.on('disconnect', (e) => this.onDisconnect(e));
-    socket.on('error', () => this.onError());
-    socket.close();
+    socket.on('error', (e) => this.onError(e));
+
     this.registerHandlers(socket);
   }
 
