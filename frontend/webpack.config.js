@@ -1,4 +1,4 @@
-const HtmlWebPackPlugin = require("html-webpack-plugin");
+const HtmlWebPackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   module: {
@@ -7,14 +7,14 @@ module.exports = {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
+          loader: 'babel-loader'
         }
       },
       {
         test: /\.html$/,
         use: [
           {
-            loader: "html-loader"
+            loader: 'html-loader'
           }
         ]
       },
@@ -28,7 +28,7 @@ module.exports = {
             options: {
               importLoaders: 1,
               modules: {
-                localIdentName: "[name]__[local]___[hash:base64:5]",
+                localIdentName: '[name]__[local]___[hash:base64:5]',
               },
             }
           }
@@ -70,9 +70,9 @@ module.exports = {
   },
   plugins: [
     new HtmlWebPackPlugin({
-      favicon: "./src/img/favicon.png",
-      template: "./src/index.html",
-      filename: "./index.html"
+      favicon: './src/img/favicon.png',
+      template: './src/index.html',
+      filename: './index.html'
     })
   ],
   devServer: {

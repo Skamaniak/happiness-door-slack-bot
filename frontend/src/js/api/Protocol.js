@@ -1,4 +1,4 @@
-import {getHappinessDoorId} from "../util/auth";
+import {getHappinessDoorId} from '../util/auth';
 
 export const MessageType = {
   fromBackend: {
@@ -8,18 +8,18 @@ export const MessageType = {
     voting: 'VoteAction'
   }
 
-}
+};
 
 export const VotingAction = {
-  happy: "VOTE_HAPPY",
-  neutral: "VOTE_NEUTRAL",
-  sad: "VOTE_SAD"
-}
+  happy: 'VOTE_HAPPY',
+  neutral: 'VOTE_NEUTRAL',
+  sad: 'VOTE_SAD'
+};
 
 // TODO: this needs to be taken from OAUTH or cookie
 export const createVoteMessage = (action) => {
   return {
-    "action_id": action,
-    "value": getHappinessDoorId()
-  }
-}
+    'action_id': action,
+    'value': getHappinessDoorId()
+  };
+};

@@ -1,14 +1,14 @@
-import React, {Component} from "react";
+import React, {Component} from 'react';
 
-import {createVoteMessage, MessageType} from "../api/Protocol"
-import {getAuthUrlParams} from "../util/auth";
-import {config} from "../config";
-import UserStore from "../userStore";
+import {createVoteMessage, MessageType} from '../api/Protocol';
+import {getAuthUrlParams} from '../util/auth';
+import {config} from '../config';
+import UserStore from '../userStore';
 import Socket from '../api/Socket';
-import LoadingIndicator from "./LoadingIndicator";
-import NoAccess from "./NoAccess";
-import HappinessDoor from "./HappinessDoor";
-import SlackUserBar from "./SlackUserBar";
+import LoadingIndicator from './LoadingIndicator';
+import NoAccess from './NoAccess';
+import HappinessDoor from './HappinessDoor';
+import SlackUserBar from './SlackUserBar';
 
 class App extends Component {
   constructor(props) {
@@ -17,13 +17,13 @@ class App extends Component {
     this.state = {
       connected: false,
       error: false,
-    }
+    };
   }
 
   backendUrl() {
     let authParams = getAuthUrlParams();
     if (authParams) {
-      authParams += "&u=" + UserStore.getUser();
+      authParams += '&u=' + UserStore.getUser();
     }
     return config.backendUrl + authParams;
   }
@@ -38,7 +38,7 @@ class App extends Component {
 
   connect() {
     let socket = new Socket(this.backendUrl());
-    this.setState({socket})
+    this.setState({socket});
 
     socket.on('connect', () => this.onConnect());
     socket.on('disconnect', (e) => this.onDisconnect(e));
@@ -51,7 +51,7 @@ class App extends Component {
     if (this.state.connected) {
       this.state.socket.close();
     }
-    this.setState({error: false})
+    this.setState({error: false});
   }
 
   reconnect() {
@@ -83,13 +83,13 @@ class App extends Component {
   }
 
   happinessDoorData(data) {
-    this.setState({happinessDoor: data})
+    this.setState({happinessDoor: data});
   }
 
   renderLoadingIndicator() {
     return (
       <LoadingIndicator/>
-    )
+    );
   }
 
   renderAccessDenied() {
@@ -98,7 +98,7 @@ class App extends Component {
         <SlackUserBar onUserChange={() => this.reconnect()}/>
         <NoAccess/>
       </>
-    )
+    );
   }
 
   render() {
@@ -112,10 +112,10 @@ class App extends Component {
       <>
         <SlackUserBar onUserChange={() => this.reconnect()}/>
         <HappinessDoor happinessDoor={this.state.happinessDoor}
-                       onVote={(a) => this.onVote(a)}
-                       onUserChange={() => this.reconnect()}/>
+          onVote={(a) => this.onVote(a)}
+          onUserChange={() => this.reconnect()}/>
       </>
-    )
+    );
   }
 }
 

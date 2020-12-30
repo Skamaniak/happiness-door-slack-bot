@@ -1,14 +1,14 @@
-import React, {Component} from "react";
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {VotingAction} from "../api/Protocol";
+import {VotingAction} from '../api/Protocol';
 
-import styles from "../../css/modules/happiness.door.module.css"
-import VoteOption from "./VoteOption";
-import {Col, Row} from "react-bootstrap";
+import styles from '../../css/modules/happiness.door.module.css';
+import VoteOption from './VoteOption';
+import {Col, Row} from 'react-bootstrap';
 
 class HappinessDoor extends Component {
   render() {
-    let {happinessDoor, onVote} = this.props
+    let {happinessDoor, onVote} = this.props;
 
     return (
       <>
@@ -22,25 +22,25 @@ class HappinessDoor extends Component {
         </Row>
 
         <VoteOption
-          type={"happy"}
-          optionText={"I'm happy"}
+          type={'happy'}
+          optionText={'I\'m happy'}
           voters={happinessDoor.HappyVoters}
           onVote={() => onVote(VotingAction.happy)}/>
         <VoteOption
-          type={"neutral"}
-          optionText={"Neither good nor bad"}
+          type={'neutral'}
+          optionText={'Neither good nor bad'}
           voters={happinessDoor.NeutralVoters}
           onVote={() => onVote(VotingAction.neutral)}/>
         <VoteOption
-          type={"sad"}
-          optionText={"I did not like it"}
+          type={'sad'}
+          optionText={'I did not like it'}
           voters={happinessDoor.SadVoters}
           onVote={() => onVote(VotingAction.sad)}/>
         <Col xl={{span: 6, offset: 3}} lg={{span: 12}} md={{span: 12}} sm={{span: 12}} xs={{span: 12}}>
           <hr/>
         </Col>
       </>
-    )
+    );
   }
 }
 

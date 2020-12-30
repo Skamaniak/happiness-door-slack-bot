@@ -9,15 +9,15 @@ export default class Socket {
     this.webSocket.onopen = this.onOpen.bind(this);
     this.webSocket.onclose = this.onClose.bind(this);
     this.webSocket.onerror = this.onError.bind(this);
-  };
+  }
 
   on(name, fn) {
     this.eventEmitter.on(name, fn);
-  };
+  }
 
   off(name, fn) {
     this.eventEmitter.removeListener(name, fn);
-  };
+  }
 
   emit(name, data) {
     const message = JSON.stringify({name, data});
@@ -25,19 +25,19 @@ export default class Socket {
   }
 
   close() {
-    this.webSocket.close(1000, "Graceful disconnect")
+    this.webSocket.close(1000, 'Graceful disconnect');
   }
 
   onOpen() {
     this.eventEmitter.emit('connect');
-  };
+  }
 
   onClose(e) {
     this.eventEmitter.emit('disconnect', e);
-  };
+  }
 
   onError(e) {
-    console.error("websocket error", e);
+    console.error('websocket error', e);
     this.eventEmitter.emit('error', e);
   }
 
@@ -48,7 +48,7 @@ export default class Socket {
       this.eventEmitter.emit(message.name, message.data);
     } catch (err) {
       this.eventEmitter.emit('error', err);
-      console.log(Date().toString() + ": ", err);
+      console.log(Date().toString() + ': ', err);
     }
   }
 }

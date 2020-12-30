@@ -1,10 +1,10 @@
-import React, {Component} from "react";
-import PropTypes from "prop-types";
-import styles from "../../css/modules/vote.option.module.css"
-import {Row, Col, Button} from "react-bootstrap";
-import HappyEmoji from "../../img/emoji_happy.png"
-import NeutralEmoji from "../../img/emoji_neutral.png"
-import SadEmoji from "../../img/emoji_sad.png"
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
+import styles from '../../css/modules/vote.option.module.css';
+import {Row, Col, Button} from 'react-bootstrap';
+import HappyEmoji from '../../img/emoji_happy.png';
+import NeutralEmoji from '../../img/emoji_neutral.png';
+import SadEmoji from '../../img/emoji_sad.png';
 
 class VoteOption extends Component {
 
@@ -13,13 +13,13 @@ class VoteOption extends Component {
       <>
         {voters.map(voter => (
           <img key={voter.Id}
-               className={styles.voterPicture}
-               src={voter.ProfilePicture}
-               alt={voter.Name}
-               title={voter.Name}/>
+            className={styles.voterPicture}
+            src={voter.ProfilePicture}
+            alt={voter.Name}
+            title={voter.Name}/>
         ))}
       </>
-    )
+    );
   }
 
   renderVoteCount(voters) {
@@ -28,21 +28,21 @@ class VoteOption extends Component {
         <>
           <span> - {voters.length} votes</span>
         </>
-      )
+      );
     }
   }
 
   getEmoji(type) {
-    if (type === "happy") {
+    if (type === 'happy') {
       return HappyEmoji;
-    } else if (type === "neutral") {
+    } else if (type === 'neutral') {
       return NeutralEmoji;
     }
     return SadEmoji;
   }
 
   render() {
-    let {type, optionText, voters, onVote} = this.props
+    let {type, optionText, voters, onVote} = this.props;
     voters = voters || [];
 
     return (
