@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/conf"
 	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 	"github.com/slack-go/slack"

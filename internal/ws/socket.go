@@ -2,8 +2,8 @@ package ws
 
 import (
 	"fmt"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/conf"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/domain"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

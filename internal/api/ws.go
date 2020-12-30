@@ -2,9 +2,9 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/ws"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/domain"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/service"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/ws"
 	"github.com/sirupsen/logrus"
 )
 

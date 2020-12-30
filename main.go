@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/Skamaniak/happiness-door-slack-bot/cmd"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/log"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/conf"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/log"
 	"github.com/sirupsen/logrus"
 )
 

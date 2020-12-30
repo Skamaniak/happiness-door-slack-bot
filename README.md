@@ -11,7 +11,7 @@ You need to set up a few ENV variables for the app to work
 You can also customise other variables to make the experience better. For example
 - `BOT_NAME` - this should be set to the slack name of the bot. E.g. `happiness_door_bot`. You can find the bot name in slack app management under `Features > App Home > Your App’s Presence in Slack`.
 
-For more config options please see [configuration.go](pkg/conf/configuration.go).
+For more config options please see [configuration.go](internal/conf/configuration.go).
 
 ## Setting up slack application
 #### Required permissions for the Slack app are

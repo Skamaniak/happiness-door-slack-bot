@@ -1,7 +1,7 @@
 package log
 
 import (
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/conf"
 	"github.com/sirupsen/logrus"
 	"os"
 	"time"

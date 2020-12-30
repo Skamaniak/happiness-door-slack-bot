@@ -1,10 +1,10 @@
 package server
 
 import (
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/api"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/ws"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/api"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/conf"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/service"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/ws"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

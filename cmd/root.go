@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/client"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/conf"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/db"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/server"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/client"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/conf"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/db"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/server"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/service"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

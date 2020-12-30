@@ -3,8 +3,8 @@ package ws
 import (
 	"errors"
 	"fmt"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/service"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/domain"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/service"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"net/http"

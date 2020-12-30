@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/Skamaniak/happiness-door-slack-bot/pkg/domain"
+	"github.com/Skamaniak/happiness-door-slack-bot/internal/domain"
 	"github.com/sirupsen/logrus"
 	"sync"
 )
