@@ -25,7 +25,9 @@ class App extends Component {
     if (authParams) {
       authParams += '&u=' + UserStore.getUser();
     }
-    return config.backendUrl + authParams;
+    const protocol = window.location.protocol === 'http:' ? 'ws:' : 'wss:';
+    const host = config.backendPort ? window.location.hostname + ':' + config.backendPort : window.location.host;
+    return protocol + '//' + host + config.wsApiPath + authParams;
   }
 
   registerHandlers(socket) {
