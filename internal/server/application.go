@@ -24,7 +24,7 @@ func RegisterREST(r *mux.Router, s *service.SlackService) {
 
 func RegisterWS(r *mux.Router, s *service.SlackService) {
 	p := viper.GetString(conf.WebApiPrefix)
-	logrus.WithField("prefix", p).Info("Registering web socket API.")
+	logrus.WithField("prefix", p).Info("Registering WEB socket API.")
 
 	wsRouter := ws.NewRouter(s)
 	handlers := api.NewWSHandlers(s)

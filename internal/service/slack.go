@@ -192,6 +192,10 @@ func (s *SlackService) UnsubscribeHappinessDoorFeed(hdID int, ch <-chan domain.H
 	s.pubSub.unsubscribe(hdID, ch)
 }
 
+func (s *SlackService) HealthCheck() error {
+	return s.repo.DbPing()
+}
+
 func createWebUrl(hdID int, token string) string {
 	webUrl := url.URL{
 		Scheme: viper.GetString(conf.WebScheme),

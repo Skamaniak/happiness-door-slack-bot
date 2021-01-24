@@ -122,3 +122,7 @@ func (hd *HappinessDoor) GetUserActions(hdID int) ([]domain.UserVotingAction, er
 	err = rows.Err()
 	return actions, err
 }
+
+func (hd *HappinessDoor) DbPing() error {
+	return hd.db.Ping()
+}

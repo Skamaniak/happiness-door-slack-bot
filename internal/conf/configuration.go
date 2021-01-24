@@ -21,6 +21,9 @@ const (
 	WebApiPrefix              = "WEB_API_PREFIX"
 	WebSocketPingPongInterval = "WEB_PING_PONG_INTERVAL"
 	WebSocketMaxPingPongDelay = "WEB_PING_PONG_MAX_DELAY"
+	AdminApiEnabled           = "ADMIN_API_ENABLED"
+	AdminPort                 = "ADMIN_PORT"
+	AdminApiPrefix            = "ADMIN_API_PREFIX"
 )
 
 func InitConfig() {
@@ -49,6 +52,11 @@ func InitConfig() {
 	viper.SetDefault(WebFileServerEnabled, true)
 	viper.SetDefault(WebFolder, "./frontend/dist")
 	viper.SetDefault(WebFileServerPrefix, "/")
+
+	// Admin
+	viper.SetDefault(AdminPort, 8079)
+	viper.SetDefault(AdminApiEnabled, false)
+	viper.SetDefault(AdminApiPrefix, "/admin")
 
 	// DB connection
 	viper.SetDefault(DbUrl, "postgres://postgres:@localhost:5432/happiness-door")

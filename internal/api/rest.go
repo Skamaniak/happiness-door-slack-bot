@@ -21,7 +21,7 @@ func NewRestHandlers(service *service.SlackService) *RestHandlers {
 
 func logRequest(r *http.Request) {
 	if requestBytes, err := httputil.DumpRequest(r, true); err != nil {
-		logrus.WithError(err).Warn("Failed to parse request")
+		logrus.WithError(err).Warn("Failed to parse request.")
 	} else {
 		logrus.Debug(string(requestBytes))
 	}
@@ -33,13 +33,13 @@ func (h *RestHandlers) Initiation(w http.ResponseWriter, r *http.Request) {
 
 	slash, err := slack.SlashCommandParse(r)
 	if err != nil {
-		logrus.WithError(err).Warn("Failed to parse request")
+		logrus.WithError(err).Warn("Failed to parse request.")
 		return
 	}
 
 	resp, err := h.service.InitiateHappinessDoor(slash.Text, slash.ChannelID)
 	if err != nil {
-		logrus.WithError(err).Warn("Failed to create new happiness door")
+		logrus.WithError(err).Warn("Failed to create new happiness door.")
 		return
 	}
 	if resp != nil {
@@ -56,30 +56,30 @@ func (h *RestHandlers) Vote(_ http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		logrus.WithError(err).Warn("Failed to parse form")
+		logrus.WithError(err).Warn("Failed to parse form.")
 		return
 	}
 
-	logrus.WithField("Form", r.Form).Debug("Form parsed")
+	logrus.WithField("Form", r.Form).Debug("Form parsed.")
 	payload, _ := url.QueryUnescape(r.Form.Get("payload"))
 	var result domain.InteractiveResponse
 
 	err = json.Unmarshal([]byte(payload), &result)
 	if err != nil {
-		logrus.WithError(err).Warn("Failed to parse response from payload parameter")
+		logrus.WithError(err).Warn("Failed to parse response from payload parameter.")
 		return
 	}
 
 	err = h.service.SlackVoting(result)
 	if err != nil {
-		logrus.WithError(err).Warn("Failed to increment voting")
+		logrus.WithError(err).Warn("Failed to increment voting.")
 	}
 }
 
 func toJson(v interface{}) []byte {
 	jsonBytes, err := json.Marshal(v)
 	if err != nil {
-		logrus.WithError(err).Warn("Failed to marshal slack message to JSON")
+		logrus.WithError(err).Warn("Failed to marshal slack message to JSON.")
 	}
 	return jsonBytes
 }

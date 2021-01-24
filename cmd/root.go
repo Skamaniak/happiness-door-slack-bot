@@ -25,10 +25,9 @@ func createSlackService() (*service.SlackService, error) {
 	return service.NewSlackService(repo, slackClient), nil
 }
 
-func startServer(r *mux.Router) {
+func startServer(r *mux.Router, hostPort string) {
 	go func() {
-		hostPort := fmt.Sprintf(":%d", viper.GetInt(conf.Port))
-		logrus.WithField("Host", hostPort).Info("Registering HTTP handler")
+		logrus.WithField("Host", hostPort).Info("Registering HTTP handler.")
 		err := http.ListenAndServe(hostPort, r)
 		if err != nil {
 			logrus.WithError(err).Panic("Failed to initialise server.")
@@ -52,9 +51,15 @@ func Run() {
 	server.RegisterREST(r, s)
 	server.RegisterWS(r, s)
 	server.RegisterWeb(r)
-	startServer(r)
+	hp := fmt.Sprintf(":%d", viper.GetInt(conf.Port))
+	startServer(r, hp)
 
-	//TODO admin server
+	if viper.GetBool(conf.AdminApiEnabled) {
+		r = mux.NewRouter()
+		server.RegisterAdminAPI(r, s)
+		hp = fmt.Sprintf(":%d", viper.GetInt(conf.AdminPort))
+		startServer(r, hp)
+	}
 
 	awaitTermination()
 	logrus.Info("Stopping Happiness Door Bot.")
