@@ -48,14 +48,14 @@ func generateToken() string {
 }
 
 func (s *SlackService) InitiateHappinessDoor(meetingName, cID string) (*slack.Msg, error) {
-	canPost, err := s.canPostMessageToChannel(cID)
+	_, err := s.canPostMessageToChannel(cID)
 	if err != nil {
 		return nil, err
 	}
-	if !canPost {
-		msg := domain.CreateNotAMemberMessage(viper.GetString(conf.BotName))
-		return &msg, nil
-	}
+	//if !canPost {
+	//	msg := domain.CreateNotAMemberMessage(viper.GetString(conf.BotName))
+	//	return &msg, nil
+	//}
 	return nil, s.sendHappinessDoor(meetingName, cID)
 }
 
